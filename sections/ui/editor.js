@@ -13,6 +13,7 @@
     panel.classList.add('open');
     overlay.classList.add('open');
     fab.style.display = 'none';
+    $('#style-fab').style.display = 'none';
   };
   $('#ed-close').onclick  = closePanel;
   overlay.onclick         = closePanel;
@@ -20,7 +21,12 @@
     panel.classList.remove('open');
     overlay.classList.remove('open');
     fab.style.display = '';
+    $('#style-fab').style.display = '';
   }
+
+  const styleFab   = $('#style-fab');
+  const tweaksPanel = $('#tweaks');
+  styleFab.onclick = () => tweaksPanel.classList.toggle('on');
 
   // accordion
   document.addEventListener('click', e => {

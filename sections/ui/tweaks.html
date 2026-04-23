@@ -1,39 +1,61 @@
 <aside class="tweaks" id="tweaks">
-  <h3>Tweaks <button class="close" id="tw-close" aria-label="close">×</button></h3>
+  <h3>Tweaks <button type="button" class="close" id="tw-close" aria-label="close">×</button></h3>
 
   <div class="tweak-row">
-    <label>Style</label>
+    <label>Theme</label>
     <div class="seg" data-key="style">
-      <button data-v="modern">Modern</button>
-      <button data-v="classic">Classic</button>
-      <button data-v="editorial">Editorial</button>
+      <button type="button" data-v="modern">Modern</button>
+      <button type="button" data-v="classic">Classic</button>
+      <button type="button" data-v="editorial">Editorial</button>
+      <button type="button" data-v="minimal">Minimal</button>
+      <button type="button" data-v="bold">Bold</button>
+    </div>
+  </div>
+
+  <div class="tweak-row">
+    <label>Font size</label>
+    <div class="seg" data-key="fontsize">
+      <button type="button" data-v="small">Small</button>
+      <button type="button" data-v="medium">Medium</button>
+      <button type="button" data-v="large">Large</button>
     </div>
   </div>
 
   <div class="tweak-row">
     <label>Accent colour</label>
     <div class="swatches" data-key="accent">
-      <button data-v="terracotta" style="background: oklch(0.55 0.10 50)" title="Terracotta"></button>
-      <button data-v="olive"      style="background: oklch(0.50 0.08 120)" title="Olive"></button>
-      <button data-v="navy"       style="background: oklch(0.40 0.08 250)" title="Navy"></button>
-      <button data-v="plum"       style="background: oklch(0.42 0.09 340)" title="Plum"></button>
-      <button data-v="ink"        style="background: oklch(0.25 0.01 60)" title="Ink"></button>
+      <button type="button" class="sw-terracotta" data-v="terracotta" title="Terracotta"></button>
+      <button type="button" class="sw-olive"      data-v="olive"      title="Olive"></button>
+      <button type="button" class="sw-navy"       data-v="navy"       title="Navy"></button>
+      <button type="button" class="sw-plum"       data-v="plum"       title="Plum"></button>
+      <button type="button" class="sw-ink"        data-v="ink"        title="Ink"></button>
+    </div>
+  </div>
+
+  <div class="tweak-row">
+    <label>Sidebar colour</label>
+    <div class="swatches" data-key="sidebarcolor">
+      <button type="button" class="sw-charcoal" data-v="charcoal" title="Charcoal"></button>
+      <button type="button" class="sw-slate"    data-v="slate"    title="Slate Blue"></button>
+      <button type="button" class="sw-forest"   data-v="forest"   title="Forest"></button>
+      <button type="button" class="sw-wine"     data-v="wine"     title="Wine"></button>
+      <button type="button" class="sw-sand"     data-v="sand"     title="Sand"></button>
     </div>
   </div>
 
   <div class="tweak-row">
     <label>Sidebar position</label>
     <div class="seg" data-key="sidebar">
-      <button data-v="left">Left</button>
-      <button data-v="right">Right</button>
+      <button type="button" data-v="left">Left</button>
+      <button type="button" data-v="right">Right</button>
     </div>
   </div>
 
   <div class="tweak-row">
     <label>Photo</label>
     <div class="seg" data-key="photo">
-      <button data-v="on">Show</button>
-      <button data-v="off">Hide</button>
+      <button type="button" data-v="on">Show</button>
+      <button type="button" data-v="off">Hide</button>
     </div>
   </div>
 </aside>

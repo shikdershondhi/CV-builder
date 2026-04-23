@@ -39,7 +39,7 @@
   $('#ed-save').onclick = saveAll;
 
   const pdfBtn = $('#ed-pdf');
-  if (pdfBtn) pdfBtn.onclick = () => window.print();
+  if (pdfBtn) pdfBtn.onclick = () => setTimeout(() => window.print(), 0);
 
   // ── Save CV Data (JSON export) ──
   const saveJsonBtn = $('#ed-save-json');

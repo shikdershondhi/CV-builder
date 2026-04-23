@@ -1,7 +1,7 @@
 #edit-fab {
   position: fixed;
-  left: 20px;
-  bottom: 20px;
+  top: 64px;
+  right: 20px;
   z-index: 100;
   background: var(--ink);
   color: var(--paper);
@@ -20,8 +20,8 @@
 
 #upload-fab {
   position: fixed;
-  left: 130px;
-  bottom: 20px;
+  top: 108px;
+  right: 20px;
   z-index: 100;
   background: var(--accent);
   color: #fff;
@@ -41,8 +41,8 @@
 
 #pdf-import-fab {
   position: fixed;
-  left: 247px;
-  bottom: 20px;
+  top: 152px;
+  right: 20px;
   z-index: 100;
   background: oklch(0.38 0.07 250);
   color: #fff;
@@ -63,8 +63,8 @@
 
 .pdf-hint-icon {
   position: fixed;
-  left: 390px;
-  bottom: 27px;
+  top: 160px;
+  right: 176px;
   z-index: 101;
   width: 18px;
   height: 18px;

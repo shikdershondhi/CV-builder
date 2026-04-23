@@ -14,6 +14,7 @@
     overlay.classList.add('open');
     fab.style.display = 'none';
     $('#style-fab').style.display = 'none';
+    $('#upload-fab').style.display = 'none';
   };
   $('#ed-close').onclick  = closePanel;
   overlay.onclick         = closePanel;
@@ -22,6 +23,7 @@
     overlay.classList.remove('open');
     fab.style.display = '';
     $('#style-fab').style.display = '';
+    $('#upload-fab').style.display = '';
   }
 
   const styleFab   = $('#style-fab');
@@ -38,6 +40,43 @@
 
   const pdfBtn = $('#ed-pdf');
   if (pdfBtn) pdfBtn.onclick = () => window.print();
+
+  // ── Save CV Data (JSON export) ──
+  const saveJsonBtn = $('#ed-save-json');
+  if (saveJsonBtn) saveJsonBtn.onclick = () => {
+    const data = extractAllData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = (data.name || 'my-cv') + '.cvdata.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ── Upload CV (JSON import) ──
+  const uploadFab   = $('#upload-fab');
+  const uploadInput = $('#cv-upload-input');
+  if (uploadFab) uploadFab.onclick = () => uploadInput.click();
+  if (uploadInput) uploadInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        applyAllData(data);
+        if (panel.classList.contains('open')) buildEditor();
+        const prev = uploadFab.textContent;
+        uploadFab.textContent = 'CV Loaded ✓';
+        setTimeout(() => { uploadFab.textContent = prev; }, 2000);
+      } catch(_) {
+        alert('Invalid file. Please upload a .json file exported from this CV builder.');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  };
 
 
   // ── mutable lists & photo state ──
@@ -747,6 +786,283 @@
       dataArr.splice(toIdx, 0, moved);
       renderFn(container);                   // re-render in new order
     });
+  }
+
+  // ── Extract all CV data from DOM into a plain object ──
+  function extractAllData() {
+    // Role: read only text nodes (skip badge/icon child elements)
+    const roleEl = $('.role');
+    let roleText = '';
+    if (roleEl) roleEl.childNodes.forEach(n => { if (n.nodeType === 3) roleText += n.textContent; });
+
+    const sidebarSecs = $$('.side-section');
+    const contactRows = sidebarSecs[0]
+      ? $$('.contact-row', sidebarSecs[0]).map(r => ({ k: r.querySelector('.k').textContent.trim(), v: r.querySelector('.v').textContent.trim() }))
+      : [];
+    const personalRows = sidebarSecs[1]
+      ? $$('.contact-row', sidebarSecs[1]).map(r => ({ k: r.querySelector('.k').textContent.trim(), v: r.querySelector('.v').textContent.trim() }))
+      : [];
+
+    const skills = $$('.skill-list li').map(li => {
+      const bar = li.querySelector('.bar');
+      const lv  = parseInt((bar.style.getPropertyValue('--lv') || '70%').replace('%', '')) || 70;
+      return { name: li.childNodes[0].textContent.trim(), lv };
+    });
+
+    const langs = $$('.lang-list li').map(li => ({
+      name: li.childNodes[0].textContent.trim(),
+      lvl:  li.querySelector('.lvl').textContent.trim()
+    }));
+
+    const work = $$('.job-item').map(item => {
+      const whereEl = item.querySelector('.job-where');
+      let org = '', location = '';
+      if (whereEl) whereEl.childNodes.forEach(n => {
+        if (n.nodeType === 3 && n.textContent.trim()) { if (!org) org = n.textContent.trim(); else location = n.textContent.trim(); }
+      });
+      return {
+        date:    (item.querySelector('.meta-date') || { innerHTML: '' }).innerHTML.replace(/<br\s*\/?>/gi, ' ').trim(),
+        title:   (item.querySelector('.job-title')  || { textContent: '' }).textContent.trim(),
+        org, location,
+        bullets: jobNotesToText(item.querySelector('.job-note'))
+      };
+    });
+
+    const edu = $$('.edu-item').map(item => {
+      const whereEl = item.querySelector('.edu-where');
+      const sep = whereEl ? whereEl.querySelector('.sep') : null;
+      let institution = '';
+      if (whereEl) whereEl.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) institution = n.textContent.trim(); });
+      const gradeNode = sep ? sep.nextSibling : null;
+      return {
+        date:        (item.querySelector('.meta-date')  || { textContent: '' }).textContent.trim(),
+        title:       (item.querySelector('.edu-title')  || { textContent: '' }).textContent.trim(),
+        institution,
+        grade:       gradeNode ? gradeNode.textContent.trim() : '',
+        notes:       notesToText(item.querySelector('.edu-note'))
+      };
+    });
+
+    const training = $$('.train-item').map(item => {
+      const whereEl = item.querySelector('.train-where');
+      const durEl   = whereEl ? whereEl.querySelector('.train-dur') : null;
+      let institute = '';
+      if (whereEl) whereEl.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) institute = n.textContent.trim(); });
+      return {
+        date:     (item.querySelector('.meta-date')    || { textContent: '' }).textContent.trim(),
+        name:     (item.querySelector('.train-title')  || { textContent: '' }).textContent.trim(),
+        institute,
+        duration: durEl ? durEl.textContent.replace(/^\s*·\s*/, '').trim() : ''
+      };
+    });
+
+    const strengths = $$('.soft').map(soft => {
+      const bold = (soft.querySelector('b') || { textContent: '' }).textContent.trim();
+      let desc = '';
+      const span = soft.querySelector('span');
+      if (span) span.childNodes.forEach(n => { if (n.nodeType === 3) { const t = n.textContent.replace(/^\s*[—–-]+\s*/, '').trim(); if (t) desc = t; } });
+      return { title: bold, desc };
+    });
+
+    const refs = $$('.ref-card').map(card => ({
+      name:  (card.querySelector('.ref-name')  || { textContent: '' }).textContent.trim(),
+      role:  [...card.querySelectorAll('.ref-role')].map(r => r.textContent.trim()).join('\n'),
+      phone: (card.querySelector('.ref-phone') || { textContent: '' }).textContent.trim()
+    }));
+
+    const footerSpans = $$('.page-foot span');
+    const htmlEl = document.documentElement;
+
+    return {
+      version:      1,
+      photo:        photoDataUrl,
+      photoFileName,
+      name:         ($('.name') || { textContent: '' }).textContent.trim(),
+      role:         roleText.trim(),
+      contactRows, personalRows,
+      skills, langs,
+      interests:    $$('.hobby-chips span').map(s => s.textContent.trim()).join(', '),
+      profile:      ($('.summary .lead') || { textContent: '' }).textContent.trim(),
+      work, edu, training, strengths, refs,
+      footerLeft:   (footerSpans[0] || { textContent: '' }).textContent.trim(),
+      footerRight:  (footerSpans[1] || { textContent: '' }).textContent.trim(),
+      theme: {
+        style:       htmlEl.getAttribute('data-style')   || 'modern',
+        fontsize:    htmlEl.getAttribute('data-fontsize') || 'medium',
+        sidebar:     htmlEl.getAttribute('data-sidebar') || 'left',
+        photo:       htmlEl.getAttribute('data-photo')   || 'on',
+        accent:      (document.querySelector('.swatches[data-key="accent"] button.active')      || { dataset: { v: 'terracotta' } }).dataset.v,
+        sidebarcolor:(document.querySelector('.swatches[data-key="sidebarcolor"] button.active') || { dataset: { v: 'charcoal'   } }).dataset.v
+      }
+    };
+  }
+
+  // ── Apply a saved data object back to the DOM ──
+  function applyAllData(data) {
+    // Photo
+    if (data.photo) {
+      photoDataUrl  = data.photo;
+      photoFileName = data.photoFileName || 'photo.jpg';
+      try { localStorage.setItem('cv-photo', photoDataUrl); localStorage.setItem('cv-photo-name', photoFileName); } catch(_) {}
+      applyPhoto(photoDataUrl);
+    } else {
+      photoDataUrl  = null;
+      photoFileName = 'photo.jpg';
+      try { localStorage.removeItem('cv-photo'); localStorage.removeItem('cv-photo-name'); } catch(_) {}
+      const photoDiv = $('.photo');
+      photoDiv.classList.remove('has-img');
+      photoDiv.innerHTML = 'photo · 1:1';
+    }
+
+    // Header
+    if (data.name !== undefined) $('.name').textContent = data.name;
+    if (data.role !== undefined) {
+      const roleEl = $('.role');
+      [...roleEl.childNodes].forEach(n => { if (n.nodeType === 3) n.remove(); });
+      roleEl.insertBefore(document.createTextNode(data.role), roleEl.firstChild);
+    }
+
+    // Contact / Personal sidebar rows
+    if (data.contactRows) {
+      const rows = $$('.contact-row', $$('.side-section')[0]);
+      rows.forEach((row, i) => { if (data.contactRows[i]) row.querySelector('.v').textContent = data.contactRows[i].v; });
+    }
+    if (data.personalRows) {
+      const rows = $$('.contact-row', $$('.side-section')[1]);
+      rows.forEach((row, i) => { if (data.personalRows[i]) row.querySelector('.v').textContent = data.personalRows[i].v; });
+    }
+
+    // Skills
+    if (data.skills) {
+      skillsData = data.skills;
+      const ul = $('.skill-list'); ul.innerHTML = '';
+      skillsData.forEach(s => {
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(s.name + ' '));
+        const bar = document.createElement('span'); bar.className = 'bar'; bar.style.setProperty('--lv', s.lv + '%');
+        li.appendChild(bar); ul.appendChild(li);
+      });
+    }
+
+    // Languages
+    if (data.langs) {
+      langsData = data.langs;
+      const ul = $('.lang-list'); ul.innerHTML = '';
+      langsData.forEach(l => {
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(l.name + ' '));
+        const lvl = document.createElement('span'); lvl.className = 'lvl'; lvl.textContent = l.lvl;
+        li.appendChild(lvl); ul.appendChild(li);
+      });
+    }
+
+    // Interests
+    if (data.interests !== undefined) {
+      const chips = data.interests.split(',').map(s => s.trim()).filter(Boolean);
+      const el = $('.hobby-chips'); el.innerHTML = '';
+      chips.forEach(ch => { const s = document.createElement('span'); s.textContent = ch; el.appendChild(s); });
+    }
+
+    // Career Objective
+    if (data.profile !== undefined) { const lead = $('.summary .lead'); if (lead) lead.textContent = data.profile; }
+
+    // Work Experience
+    if (data.work) {
+      workData = data.work;
+      let workSec = null;
+      $$('.section').forEach(sec => { if ((sec.querySelector('.sec-h') || { textContent: '' }).textContent.includes('Work Experience')) workSec = sec; });
+      if (workSec) {
+        $$('.job-item', workSec).forEach(el => el.remove());
+        workData.forEach(w => {
+          const lines = (w.bullets || '').split('\n').map(l => l.trim()).filter(Boolean);
+          const bulletsHTML = lines.length ? '<div class="job-note"><ul>' + lines.map(l => `<li>${esc(l)}</li>`).join('') + '</ul></div>' : '';
+          const div = document.createElement('div');
+          div.className = 'job-item';
+          div.innerHTML = `<div class="meta-date">${esc(w.date).replace(/\n/g,'<br>')}</div>
+            <div><h3 class="job-title">${esc(w.title)}</h3>
+            <p class="job-where">${esc(w.org)} <span class="sep">·</span> ${esc(w.location)}</p>${bulletsHTML}</div>`;
+          workSec.appendChild(div);
+        });
+      }
+    }
+
+    // Education
+    if (data.edu) {
+      eduData = data.edu;
+      let eduSec = null;
+      $$('.section').forEach(sec => { if ((sec.querySelector('.sec-h') || { textContent: '' }).textContent.includes('Education')) eduSec = sec; });
+      if (eduSec) {
+        $$('.edu-item', eduSec).forEach(el => el.remove());
+        eduData.forEach(e => {
+          const lines = (e.notes || '').split('\n').map(l => l.trim()).filter(Boolean);
+          const notesHTML = lines.length > 1 ? '<ul>' + lines.map(l => `<li>${esc(l)}</li>`).join('') + '</ul>' : (lines[0] ? esc(lines[0]) : '');
+          const div = document.createElement('div');
+          div.className = 'edu-item';
+          div.innerHTML = `<div class="meta-date">${esc(e.date)}</div>
+            <div><h3 class="edu-title">${esc(e.title)}</h3>
+            <p class="edu-where">${esc(e.institution)} <span class="sep">·</span> ${esc(e.grade)}</p>
+            ${notesHTML ? `<div class="edu-note">${notesHTML}</div>` : ''}</div>`;
+          eduSec.appendChild(div);
+        });
+      }
+    }
+
+    // Training & Certifications
+    if (data.training) {
+      trainingData = data.training;
+      let trainSec = null;
+      $$('.section').forEach(sec => { if ((sec.querySelector('.sec-h') || { textContent: '' }).textContent.includes('Training')) trainSec = sec; });
+      if (trainSec) {
+        $$('.train-item', trainSec).forEach(el => el.remove());
+        trainingData.forEach(t => {
+          const durHTML = t.duration ? ` <span class="train-dur">· ${esc(t.duration)}</span>` : '';
+          const div = document.createElement('div');
+          div.className = 'train-item';
+          div.innerHTML = `<div class="meta-date">${esc(t.date)}</div>
+            <div><h3 class="train-title">${esc(t.name)}</h3>
+            <p class="train-where">${esc(t.institute)}${durHTML}</p></div>`;
+          trainSec.appendChild(div);
+        });
+      }
+    }
+
+    // Transferable Strengths
+    if (data.strengths) {
+      strengthsData = data.strengths;
+      const grid = $('.soft-grid'); grid.innerHTML = '';
+      strengthsData.forEach(s => {
+        const div = document.createElement('div'); div.className = 'soft';
+        div.innerHTML = `<span class="dot"></span><span><b>${esc(s.title)}</b> — ${esc(s.desc)}</span>`;
+        grid.appendChild(div);
+      });
+    }
+
+    // References
+    if (data.refs) {
+      refsData = data.refs;
+      const refSec = $$('.side-section').find(s => (s.querySelector('.side-h') || { textContent: '' }).textContent.includes('Reference'));
+      if (refSec) {
+        $$('.ref-card', refSec).forEach(el => el.remove());
+        refsData.forEach(r => {
+          const lines = (r.role || '').split('\n').map(l => l.trim()).filter(Boolean);
+          const div = document.createElement('div'); div.className = 'ref-card';
+          div.innerHTML = `<div class="ref-name">${esc(r.name)}</div>
+            ${lines.map(l => `<div class="ref-role">${esc(l)}</div>`).join('')}
+            ${r.phone ? `<div class="ref-phone">${esc(r.phone)}</div>` : ''}`;
+          refSec.appendChild(div);
+        });
+      }
+    }
+
+    // Footer
+    const footerSpans = $$('.page-foot span');
+    if (data.footerLeft  !== undefined && footerSpans[0]) footerSpans[0].textContent = data.footerLeft;
+    if (data.footerRight !== undefined && footerSpans[1]) footerSpans[1].textContent = data.footerRight;
+
+    // Theme
+    if (data.theme && window.__cvApplyTheme) window.__cvApplyTheme(data.theme);
+
+    syncEmptyRows();
   }
 
   // ── Hide empty contact rows ──

@@ -770,6 +770,11 @@ html[data-photo="off"] .photo { display: none; }
     });
   });
 
+  window.__cvApplyTheme = function(themeData) {
+    Object.assign(state, themeData);
+    apply();
+  };
+
   const panel = document.getElementById('tweaks');
   window.addEventListener('message', (e) => {
     const d = e.data || {};

@@ -35,7 +35,7 @@
 
 
   // ── mutable lists & photo state ──
-  let skillsData = [], langsData = [], eduData = [], strengthsData = [], workData = [], refsData = [];
+  let skillsData = [], langsData = [], eduData = [], strengthsData = [], workData = [], refsData = [], trainingData = [];
   let photoDataUrl = null;
   let photoFileName = 'photo.jpg';
 
@@ -67,6 +67,7 @@
     addSection(body, 'Interests',              renderInterests);
     addSection(body, 'Career Objective',        renderProfile);
     addSection(body, 'Education',              renderEdu);
+    addSection(body, 'Training & Certifications', renderTraining);
     addSection(body, 'Transferable Strengths', renderStrengths);
     addSection(body, 'Footer',                 renderFooter);
   }
@@ -562,6 +563,78 @@
     });
   }
 
+  // ── Training & Certifications ──
+  function renderTraining(c) {
+    trainingData = $$('.train-item').map(item => {
+      const whereEl = item.querySelector('.train-where');
+      const durEl   = whereEl ? whereEl.querySelector('.train-dur') : null;
+      let institute = '';
+      if (whereEl) whereEl.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) institute = n.textContent.trim(); });
+      return {
+        date:     (item.querySelector('.meta-date')||{textContent:''}).textContent.trim(),
+        name:     (item.querySelector('.train-title')||{textContent:''}).textContent.trim(),
+        institute,
+        duration: durEl ? durEl.textContent.replace(/^\s*·\s*/, '').trim() : ''
+      };
+    });
+    renderTrainingCards(c);
+    makeSortable(c,
+      () => { document.querySelectorAll('[data-trdt]').forEach(el => { trainingData[+el.dataset.trdt].date     = el.value; }); document.querySelectorAll('[data-trn]').forEach(el => { trainingData[+el.dataset.trn].name      = el.value; }); document.querySelectorAll('[data-tri]').forEach(el => { trainingData[+el.dataset.tri].institute = el.value; }); document.querySelectorAll('[data-trd]').forEach(el => { trainingData[+el.dataset.trd].duration  = el.value; }); },
+      trainingData, renderTrainingCards);
+  }
+  function renderTrainingCards(c) {
+    c.innerHTML = '';
+    trainingData.forEach((t, i) => {
+      const card = document.createElement('div');
+      card.className = 'edcard'; card.draggable = true; card.dataset.dragIdx = i;
+      card.innerHTML = `<div class="edcard-head"><span class="ed-drag-handle" title="Drag to reorder">⠿</span><span class="edcard-num">Training ${i+1}</span>
+        <button class="edremove" type="button" data-trr="${i}">Remove</button></div>
+        <div class="edf"><label class="edlabel">Date</label>
+          <input class="edinput" data-trdt="${i}" value="${escA(t.date)}" placeholder="2024"></div>
+        <div class="edf"><label class="edlabel">Name / Certificate</label>
+          <input class="edinput" data-trn="${i}" value="${escA(t.name)}" placeholder="Basic Computer Training…"></div>
+        <div class="ed2col">
+          <div class="edf"><label class="edlabel">Institute</label>
+            <input class="edinput" data-tri="${i}" value="${escA(t.institute)}" placeholder="STOP N Go"></div>
+          <div class="edf"><label class="edlabel">Duration</label>
+            <input class="edinput" data-trd="${i}" value="${escA(t.duration)}" placeholder="6 months"></div>
+        </div>`;
+      c.appendChild(card);
+    });
+    const add = document.createElement('button');
+    add.className = 'edadd'; add.textContent = '+ Add Training';
+    add.onclick = () => { trainingData.push({date:'',name:'',institute:'',duration:''}); renderTrainingCards(c); };
+    c.appendChild(add);
+    c.querySelectorAll('[data-trr]').forEach(b => b.onclick = () => {
+      trainingData.splice(+b.dataset.trr, 1); renderTrainingCards(c);
+    });
+  }
+  function saveTraining() {
+    document.querySelectorAll('[data-trdt]').forEach(el => { trainingData[+el.dataset.trdt].date     = el.value; });
+    document.querySelectorAll('[data-trn]').forEach(el => { trainingData[+el.dataset.trn].name      = el.value; });
+    document.querySelectorAll('[data-tri]').forEach(el => { trainingData[+el.dataset.tri].institute = el.value; });
+    document.querySelectorAll('[data-trd]').forEach(el => { trainingData[+el.dataset.trd].duration  = el.value; });
+
+    let trainSec = null;
+    $$('.section').forEach(sec => {
+      if ((sec.querySelector('.sec-h')||{textContent:''}).textContent.includes('Training')) trainSec = sec;
+    });
+    if (!trainSec) return;
+    $$('.train-item', trainSec).forEach(el => el.remove());
+
+    trainingData.forEach(t => {
+      const durHTML = t.duration ? ` <span class="train-dur">· ${esc(t.duration)}</span>` : '';
+      const div = document.createElement('div');
+      div.className = 'train-item';
+      div.innerHTML = `<div class="meta-date">${esc(t.date)}</div>
+        <div>
+          <h3 class="train-title">${esc(t.name)}</h3>
+          <p class="train-where">${esc(t.institute)}${durHTML}</p>
+        </div>`;
+      trainSec.appendChild(div);
+    });
+  }
+
   // ── Strengths ──
   function renderStrengths(c) {
     strengthsData = $$('.soft').map(soft => {
@@ -682,7 +755,7 @@
   function saveAll() {
     saveHeader(); saveContact(); savePersonal(); saveSkills();
     saveLangs(); saveInterests(); saveProfile(); saveEdu();
-    saveStrengths(); saveFooter();
+    saveTraining(); saveStrengths(); saveFooter();
     saveWork(); saveRefs();
     syncEmptyRows();
 

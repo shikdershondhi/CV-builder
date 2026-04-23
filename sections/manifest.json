@@ -5,6 +5,7 @@
     { "slot": "objective", "file": "sections/cv/objective.html" },
     { "slot": "work-experience", "file": "sections/cv/work-experience.html" },
     { "slot": "education", "file": "sections/cv/education.html" },
+    { "slot": "training", "file": "sections/cv/training.html" },
     { "slot": "strengths", "file": "sections/cv/strengths.html" },
     { "slot": "footer", "file": "sections/cv/footer.html" },
     { "slot": "tweaks", "file": "sections/ui/tweaks.html" },

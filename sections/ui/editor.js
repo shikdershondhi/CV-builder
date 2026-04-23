@@ -282,12 +282,17 @@
         bullets:  jobNotesToText(item.querySelector('.job-note'))
       };
     });
-    renderWorkCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-wd]').forEach(el => { workData[+el.dataset.wd].date     = el.value; }); document.querySelectorAll('[data-wt]').forEach(el => { workData[+el.dataset.wt].title    = el.value; }); document.querySelectorAll('[data-wo]').forEach(el => { workData[+el.dataset.wo].org      = el.value; }); document.querySelectorAll('[data-wl]').forEach(el => { workData[+el.dataset.wl].location = el.value; }); document.querySelectorAll('[data-wb]').forEach(el => { workData[+el.dataset.wb].bullets  = el.value; }); },
-      workData, renderWorkCards);
+    const wSync = () => {
+      document.querySelectorAll('[data-wd]').forEach(el => { if (workData[+el.dataset.wd]) workData[+el.dataset.wd].date     = el.value; });
+      document.querySelectorAll('[data-wt]').forEach(el => { if (workData[+el.dataset.wt]) workData[+el.dataset.wt].title    = el.value; });
+      document.querySelectorAll('[data-wo]').forEach(el => { if (workData[+el.dataset.wo]) workData[+el.dataset.wo].org      = el.value; });
+      document.querySelectorAll('[data-wl]').forEach(el => { if (workData[+el.dataset.wl]) workData[+el.dataset.wl].location = el.value; });
+      document.querySelectorAll('[data-wb]').forEach(el => { if (workData[+el.dataset.wb]) workData[+el.dataset.wb].bullets  = el.value; });
+    };
+    renderWorkCards(c, wSync);
+    makeSortable(c, wSync, workData, c2 => renderWorkCards(c2, wSync));
   }
-  function renderWorkCards(c) {
+  function renderWorkCards(c, syncFn) {
     c.innerHTML = '';
     workData.forEach((w, i) => {
       const card = document.createElement('div');
@@ -312,10 +317,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Job';
-    add.onclick = () => { workData.push({date:'',title:'',org:'',location:'',bullets:''}); renderWorkCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); workData.push({date:'',title:'',org:'',location:'',bullets:''}); renderWorkCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-wr]').forEach(b => b.onclick = () => {
-      workData.splice(+b.dataset.wr, 1); renderWorkCards(c);
+      if (syncFn) syncFn(); workData.splice(+b.dataset.wr, 1); renderWorkCards(c, syncFn);
     });
   }
   function saveWork() {
@@ -357,12 +362,15 @@
       role:  [...card.querySelectorAll('.ref-role')].map(r => r.textContent.trim()).join('\n'),
       phone: (card.querySelector('.ref-phone')||{textContent:''}).textContent.trim()
     }));
-    renderRefCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-rn]').forEach(el => { refsData[+el.dataset.rn].name  = el.value; }); document.querySelectorAll('[data-rr]').forEach(el => { refsData[+el.dataset.rr].role  = el.value; }); document.querySelectorAll('[data-rp]').forEach(el => { refsData[+el.dataset.rp].phone = el.value; }); },
-      refsData, renderRefCards);
+    const rSync = () => {
+      document.querySelectorAll('[data-rn]').forEach(el => { if (refsData[+el.dataset.rn]) refsData[+el.dataset.rn].name  = el.value; });
+      document.querySelectorAll('[data-rr]').forEach(el => { if (refsData[+el.dataset.rr]) refsData[+el.dataset.rr].role  = el.value; });
+      document.querySelectorAll('[data-rp]').forEach(el => { if (refsData[+el.dataset.rp]) refsData[+el.dataset.rp].phone = el.value; });
+    };
+    renderRefCards(c, rSync);
+    makeSortable(c, rSync, refsData, c2 => renderRefCards(c2, rSync));
   }
-  function renderRefCards(c) {
+  function renderRefCards(c, syncFn) {
     c.innerHTML = '';
     refsData.forEach((r, i) => {
       const card = document.createElement('div');
@@ -379,10 +387,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Reference';
-    add.onclick = () => { refsData.push({name:'',role:'',phone:''}); renderRefCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); refsData.push({name:'',role:'',phone:''}); renderRefCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-rref]').forEach(b => b.onclick = () => {
-      refsData.splice(+b.dataset.rref, 1); renderRefCards(c);
+      if (syncFn) syncFn(); refsData.splice(+b.dataset.rref, 1); renderRefCards(c, syncFn);
     });
   }
   function saveRefs() {
@@ -413,12 +421,14 @@
       const lv  = parseInt((bar.style.getPropertyValue('--lv')||'70%').replace('%',''))||70;
       return { name: li.childNodes[0].textContent.trim(), lv };
     });
-    renderSkillCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-sn]').forEach(el => { skillsData[+el.dataset.sn].name = el.value; }); document.querySelectorAll('[data-sl]').forEach(el => { skillsData[+el.dataset.sl].lv = +el.value||0; }); },
-      skillsData, renderSkillCards);
+    const sSync = () => {
+      document.querySelectorAll('[data-sn]').forEach(el => { if (skillsData[+el.dataset.sn]) skillsData[+el.dataset.sn].name = el.value; });
+      document.querySelectorAll('[data-sl]').forEach(el => { if (skillsData[+el.dataset.sl]) skillsData[+el.dataset.sl].lv   = +el.value || 0; });
+    };
+    renderSkillCards(c, sSync);
+    makeSortable(c, sSync, skillsData, c2 => renderSkillCards(c2, sSync));
   }
-  function renderSkillCards(c) {
+  function renderSkillCards(c, syncFn) {
     c.innerHTML = '';
     skillsData.forEach((s, i) => {
       const card = document.createElement('div');
@@ -435,10 +445,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Skill';
-    add.onclick = () => { skillsData.push({name:'New Skill', lv:70}); renderSkillCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); skillsData.push({name:'New Skill', lv:70}); renderSkillCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-sr]').forEach(b => b.onclick = () => {
-      skillsData.splice(+b.dataset.sr, 1); renderSkillCards(c);
+      if (syncFn) syncFn(); skillsData.splice(+b.dataset.sr, 1); renderSkillCards(c, syncFn);
     });
   }
   function saveSkills() {
@@ -460,12 +470,14 @@
       name: li.childNodes[0].textContent.trim(),
       lvl:  li.querySelector('.lvl').textContent.trim()
     }));
-    renderLangCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-ln]').forEach(el => { langsData[+el.dataset.ln].name = el.value; }); document.querySelectorAll('[data-ll]').forEach(el => { langsData[+el.dataset.ll].lvl = el.value; }); },
-      langsData, renderLangCards);
+    const lSync = () => {
+      document.querySelectorAll('[data-ln]').forEach(el => { if (langsData[+el.dataset.ln]) langsData[+el.dataset.ln].name = el.value; });
+      document.querySelectorAll('[data-ll]').forEach(el => { if (langsData[+el.dataset.ll]) langsData[+el.dataset.ll].lvl  = el.value; });
+    };
+    renderLangCards(c, lSync);
+    makeSortable(c, lSync, langsData, c2 => renderLangCards(c2, lSync));
   }
-  function renderLangCards(c) {
+  function renderLangCards(c, syncFn) {
     c.innerHTML = '';
     langsData.forEach((l, i) => {
       const card = document.createElement('div');
@@ -482,10 +494,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Language';
-    add.onclick = () => { langsData.push({name:'',lvl:''}); renderLangCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); langsData.push({name:'',lvl:''}); renderLangCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-lr]').forEach(b => b.onclick = () => {
-      langsData.splice(+b.dataset.lr, 1); renderLangCards(c);
+      if (syncFn) syncFn(); langsData.splice(+b.dataset.lr, 1); renderLangCards(c, syncFn);
     });
   }
   function saveLangs() {
@@ -533,7 +545,7 @@
       const whereEl = item.querySelector('.edu-where');
       const sep = whereEl.querySelector('.sep');
       let institution = '';
-      whereEl.childNodes.forEach(n => { if (n.nodeType===3 && n.textContent.trim()) institution = n.textContent.trim(); });
+      whereEl.childNodes.forEach(n => { if (n.nodeType===3 && n.textContent.trim() && !institution) institution = n.textContent.trim(); });
       const gradeNode = sep ? sep.nextSibling : null;
       const grade = gradeNode ? gradeNode.textContent.trim() : '';
       return {
@@ -543,12 +555,17 @@
         notes:       notesToText(item.querySelector('.edu-note'))
       };
     });
-    renderEduCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-ed]').forEach(el => { eduData[+el.dataset.ed].date        = el.value; }); document.querySelectorAll('[data-et]').forEach(el => { eduData[+el.dataset.et].title       = el.value; }); document.querySelectorAll('[data-ei]').forEach(el => { eduData[+el.dataset.ei].institution = el.value; }); document.querySelectorAll('[data-eg]').forEach(el => { eduData[+el.dataset.eg].grade       = el.value; }); document.querySelectorAll('[data-en]').forEach(el => { eduData[+el.dataset.en].notes       = el.value; }); },
-      eduData, renderEduCards);
+    const eSync = () => {
+      document.querySelectorAll('[data-ed]').forEach(el => { if (eduData[+el.dataset.ed]) eduData[+el.dataset.ed].date        = el.value; });
+      document.querySelectorAll('[data-et]').forEach(el => { if (eduData[+el.dataset.et]) eduData[+el.dataset.et].title       = el.value; });
+      document.querySelectorAll('[data-ei]').forEach(el => { if (eduData[+el.dataset.ei]) eduData[+el.dataset.ei].institution = el.value; });
+      document.querySelectorAll('[data-eg]').forEach(el => { if (eduData[+el.dataset.eg]) eduData[+el.dataset.eg].grade       = el.value; });
+      document.querySelectorAll('[data-en]').forEach(el => { if (eduData[+el.dataset.en]) eduData[+el.dataset.en].notes       = el.value; });
+    };
+    renderEduCards(c, eSync);
+    makeSortable(c, eSync, eduData, c2 => renderEduCards(c2, eSync));
   }
-  function renderEduCards(c) {
+  function renderEduCards(c, syncFn) {
     c.innerHTML = '';
     eduData.forEach((e, i) => {
       const card = document.createElement('div');
@@ -571,10 +588,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Education';
-    add.onclick = () => { eduData.push({date:'',title:'',institution:'',grade:'',notes:''}); renderEduCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); eduData.push({date:'',title:'',institution:'',grade:'',notes:''}); renderEduCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-er]').forEach(b => b.onclick = () => {
-      eduData.splice(+b.dataset.er, 1); renderEduCards(c);
+      if (syncFn) syncFn(); eduData.splice(+b.dataset.er, 1); renderEduCards(c, syncFn);
     });
   }
   function saveEdu() {
@@ -622,12 +639,16 @@
         duration: durEl ? durEl.textContent.replace(/^\s*·\s*/, '').trim() : ''
       };
     });
-    renderTrainingCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-trdt]').forEach(el => { trainingData[+el.dataset.trdt].date     = el.value; }); document.querySelectorAll('[data-trn]').forEach(el => { trainingData[+el.dataset.trn].name      = el.value; }); document.querySelectorAll('[data-tri]').forEach(el => { trainingData[+el.dataset.tri].institute = el.value; }); document.querySelectorAll('[data-trd]').forEach(el => { trainingData[+el.dataset.trd].duration  = el.value; }); },
-      trainingData, renderTrainingCards);
+    const tSync = () => {
+      document.querySelectorAll('[data-trdt]').forEach(el => { if (trainingData[+el.dataset.trdt]) trainingData[+el.dataset.trdt].date      = el.value; });
+      document.querySelectorAll('[data-trn]').forEach(el =>  { if (trainingData[+el.dataset.trn])  trainingData[+el.dataset.trn].name       = el.value; });
+      document.querySelectorAll('[data-tri]').forEach(el =>  { if (trainingData[+el.dataset.tri])  trainingData[+el.dataset.tri].institute  = el.value; });
+      document.querySelectorAll('[data-trd]').forEach(el =>  { if (trainingData[+el.dataset.trd])  trainingData[+el.dataset.trd].duration   = el.value; });
+    };
+    renderTrainingCards(c, tSync);
+    makeSortable(c, tSync, trainingData, c2 => renderTrainingCards(c2, tSync));
   }
-  function renderTrainingCards(c) {
+  function renderTrainingCards(c, syncFn) {
     c.innerHTML = '';
     trainingData.forEach((t, i) => {
       const card = document.createElement('div');
@@ -648,10 +669,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Training';
-    add.onclick = () => { trainingData.push({date:'',name:'',institute:'',duration:''}); renderTrainingCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); trainingData.push({date:'',name:'',institute:'',duration:''}); renderTrainingCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-trr]').forEach(b => b.onclick = () => {
-      trainingData.splice(+b.dataset.trr, 1); renderTrainingCards(c);
+      if (syncFn) syncFn(); trainingData.splice(+b.dataset.trr, 1); renderTrainingCards(c, syncFn);
     });
   }
   function saveTraining() {
@@ -691,12 +712,14 @@
       });
       return {title: bold, desc};
     });
-    renderStrengthCards(c);
-    makeSortable(c,
-      () => { document.querySelectorAll('[data-xt]').forEach(el => { strengthsData[+el.dataset.xt].title = el.value; }); document.querySelectorAll('[data-xd]').forEach(el => { strengthsData[+el.dataset.xd].desc = el.value; }); },
-      strengthsData, renderStrengthCards);
+    const xSync = () => {
+      document.querySelectorAll('[data-xt]').forEach(el => { if (strengthsData[+el.dataset.xt]) strengthsData[+el.dataset.xt].title = el.value; });
+      document.querySelectorAll('[data-xd]').forEach(el => { if (strengthsData[+el.dataset.xd]) strengthsData[+el.dataset.xd].desc  = el.value; });
+    };
+    renderStrengthCards(c, xSync);
+    makeSortable(c, xSync, strengthsData, c2 => renderStrengthCards(c2, xSync));
   }
-  function renderStrengthCards(c) {
+  function renderStrengthCards(c, syncFn) {
     c.innerHTML = '';
     strengthsData.forEach((s, i) => {
       const card = document.createElement('div');
@@ -711,10 +734,10 @@
     });
     const add = document.createElement('button');
     add.className = 'edadd'; add.textContent = '+ Add Strength';
-    add.onclick = () => { strengthsData.push({title:'',desc:''}); renderStrengthCards(c); };
+    add.onclick = () => { if (syncFn) syncFn(); strengthsData.push({title:'',desc:''}); renderStrengthCards(c, syncFn); };
     c.appendChild(add);
     c.querySelectorAll('[data-xr]').forEach(b => b.onclick = () => {
-      strengthsData.splice(+b.dataset.xr, 1); renderStrengthCards(c);
+      if (syncFn) syncFn(); strengthsData.splice(+b.dataset.xr, 1); renderStrengthCards(c, syncFn);
     });
   }
   function saveStrengths() {

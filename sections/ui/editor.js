@@ -13,8 +13,10 @@
     panel.classList.add('open');
     overlay.classList.add('open');
     fab.style.display = 'none';
-    $('#style-fab').style.display = 'none';
+    $('#style-fab').style.display  = 'none';
     $('#upload-fab').style.display = 'none';
+    $('#pdf-import-fab').style.display = 'none';
+    $('#pdf-hint').style.display       = 'none';
   };
   $('#ed-close').onclick  = closePanel;
   overlay.onclick         = closePanel;
@@ -22,8 +24,10 @@
     panel.classList.remove('open');
     overlay.classList.remove('open');
     fab.style.display = '';
-    $('#style-fab').style.display = '';
+    $('#style-fab').style.display  = '';
     $('#upload-fab').style.display = '';
+    $('#pdf-import-fab').style.display = '';
+    $('#pdf-hint').style.display       = '';
   }
 
   const styleFab   = $('#style-fab');
@@ -39,7 +43,7 @@
   $('#ed-save').onclick = saveAll;
 
   const pdfBtn = $('#ed-pdf');
-  if (pdfBtn) pdfBtn.onclick = () => window.print();
+  if (pdfBtn) pdfBtn.onclick = () => setTimeout(() => window.print(), 0);
 
   // ── Save CV Data (JSON export) ──
   const saveJsonBtn = $('#ed-save-json');
@@ -78,6 +82,35 @@
     reader.readAsText(file);
   };
 
+
+  // ── Load from PDF ──
+  const pdfImportFab   = $('#pdf-import-fab');
+  const pdfImportInput = $('#cv-pdf-input');
+  if (pdfImportFab) pdfImportFab.onclick = () => pdfImportInput.click();
+  if (pdfImportInput) pdfImportInput.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const prev = pdfImportFab.textContent;
+    pdfImportFab.textContent = 'Parsing…';
+    pdfImportFab.disabled = true;
+    try {
+      const data = await importFromPDF(file);
+      if (data) {
+        applyAllData(data);
+        if (panel.classList.contains('open')) buildEditor();
+        pdfImportFab.textContent = 'Loaded ✓';
+        setTimeout(() => { pdfImportFab.textContent = prev; }, 2000);
+      } else {
+        pdfImportFab.textContent = prev;
+      }
+    } catch(_) {
+      pdfImportFab.textContent = prev;
+      alert('Could not read PDF. Make sure this is a PDF exported from this CV Builder.');
+    } finally {
+      pdfImportFab.disabled = false;
+      e.target.value = '';
+    }
+  };
 
   // ── mutable lists & photo state ──
   let skillsData = [], langsData = [], eduData = [], strengthsData = [], workData = [], refsData = [], trainingData = [];
@@ -1110,4 +1143,259 @@
     btn.style.background = 'oklch(0.45 0.14 145)';
     setTimeout(() => { btn.textContent = prev; btn.style.background = ''; }, 1600);
   }
+
+  // ── PDF import ──────────────────────────────────────────────────────────────
+  async function importFromPDF(file) {
+    if (!window.pdfjsLib) {
+      alert('PDF.js library not loaded. Please refresh the page.');
+      return null;
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+
+    let pgW = 595, pgH = 842;
+    const raw = [];
+
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const vp   = page.getViewport({ scale: 1 });
+      if (p === 1) { pgW = vp.width; pgH = vp.height; }
+      const tc = await page.getTextContent();
+      tc.items.forEach(it => {
+        const s = it.str.trim();
+        if (!s) return;
+        raw.push({ text: s, x: it.transform[4], y: (pgH - it.transform[5]) + (p - 1) * pgH });
+      });
+    }
+
+    raw.sort((a, b) => a.y - b.y || a.x - b.x);
+
+    // Detect sidebar side by finding a known sidebar section header
+    const SIDE_HEAD_NAMES = ['contact', 'personal', 'technical skills', 'languages', 'references'];
+    let sideThreshold = pgW * 0.38; // default: left sidebar (~34% + padding)
+    for (const it of raw) {
+      if (SIDE_HEAD_NAMES.includes(it.text.toLowerCase())) {
+        if (it.x > pgW * 0.5) sideThreshold = pgW * 0.62;
+        break;
+      }
+    }
+    const leftSide  = sideThreshold < pgW * 0.5;
+    const sideItems = leftSide ? raw.filter(i => i.x <  sideThreshold) : raw.filter(i => i.x >= sideThreshold);
+    const mainItems = leftSide ? raw.filter(i => i.x >= sideThreshold) : raw.filter(i => i.x <  sideThreshold);
+
+    // Group text items that share the same visual line (y within 5pt)
+    function toLines(items) {
+      if (!items.length) return [];
+      const lines = [];
+      let cur = [items[0]];
+      for (let i = 1; i < items.length; i++) {
+        Math.abs(items[i].y - cur[0].y) < 5
+          ? cur.push(items[i])
+          : (lines.push(cur), cur = [items[i]]);
+      }
+      lines.push(cur);
+      return lines.map(l => {
+        const s = l.sort((a, b) => a.x - b.x);
+        return { y: s[0].y, items: s, text: s.map(i => i.text).join(' ') };
+      });
+    }
+
+    const cv = { version: 1, photo: null, photoFileName: 'photo.jpg' };
+    pdfParseMain(toLines(mainItems), cv);
+    pdfParseSide(toLines(sideItems), cv);
+    return cv;
+  }
+
+  function pdfParseMain(lines, cv) {
+    const SECS = {
+      'career objective': 'objective', 'objective': 'objective',
+      'work experience':  'work',
+      'education':        'edu',
+      'training':         'training',
+      'transferable strength': 'strengths', 'strength': 'strengths'
+    };
+
+    // Name + role appear before the first section header
+    let i = 0;
+    while (i < lines.length) {
+      const tl = lines[i].text.toLowerCase().replace(/^\d+\s*/, '');
+      if (Object.keys(SECS).some(h => tl.includes(h))) break;
+      if (!cv.name && lines[i].text.trim()) cv.name = lines[i].text.trim();
+      else if (!cv.role && lines[i].text.trim()) cv.role = lines[i].text.trim();
+      i++;
+    }
+
+    let section = null, buf = [];
+    const flush = () => {
+      if (!section || !buf.length) return;
+      if (section === 'objective') cv.profile  = buf.map(l => l.text).join(' ');
+      if (section === 'work')      cv.work      = pdfParseWork(buf);
+      if (section === 'edu')       cv.edu       = pdfParseEdu(buf);
+      if (section === 'training')  cv.training  = pdfParseTraining(buf);
+      if (section === 'strengths') cv.strengths = pdfParseStrengths(buf);
+    };
+
+    for (; i < lines.length; i++) {
+      const tl = lines[i].text.toLowerCase().replace(/^\d+\s*/, '');
+      let hit = null;
+      for (const [h, k] of Object.entries(SECS)) { if (tl.includes(h)) { hit = k; break; } }
+      if (hit) { flush(); section = hit; buf = []; }
+      else if (section) buf.push(lines[i]);
+    }
+    flush();
+  }
+
+  function pdfParseWork(lines) {
+    const items = [];
+    let cur = null;
+    for (const line of lines) {
+      const t = line.text;
+      const hasYear = /\b(19|20)\d{2}\b/.test(t) || /\bpresent\b/i.test(t);
+      if (hasYear && !t.includes('·')) {
+        const dIs = line.items.filter(i => /\b(19|20)\d{2}\b|present/i.test(i.text));
+        const tIs = line.items.filter(i => !dIs.includes(i));
+        if (cur) items.push(cur);
+        cur = { date: dIs.map(i=>i.text).join(' ').trim(), title: tIs.map(i=>i.text).join(' ').trim(), org: '', location: '', bullets: '' };
+      } else if (cur && t.includes('·')) {
+        const [org, ...rest] = t.split('·');
+        cur.org = org.trim(); cur.location = rest.join('·').trim();
+      } else if (cur && !cur.title) {
+        cur.title = t;
+      } else if (cur) {
+        const bt = t.replace(/^[•·▪◦–—\-]\s*/, '').trim();
+        if (bt) cur.bullets = (cur.bullets ? cur.bullets + '\n' : '') + bt;
+      }
+    }
+    if (cur) items.push(cur);
+    return items;
+  }
+
+  function pdfParseEdu(lines) {
+    const items = [];
+    let cur = null;
+    for (const line of lines) {
+      const t = line.text;
+      const hasYear = /\b(19|20)\d{2}\b/.test(t);
+      if (hasYear && !t.includes('·')) {
+        const dIs = line.items.filter(i => /\b(19|20)\d{2}\b/.test(i.text));
+        const tIs = line.items.filter(i => !dIs.includes(i));
+        if (cur) items.push(cur);
+        cur = { date: dIs.map(i=>i.text).join(' ').trim(), title: tIs.map(i=>i.text).join(' ').trim(), institution: '', grade: '', notes: '' };
+      } else if (cur && t.includes('·')) {
+        const [a, ...rest] = t.split('·');
+        cur.institution = a.trim(); cur.grade = rest.join('·').trim();
+      } else if (cur && !cur.title) {
+        cur.title = t;
+      } else if (cur) {
+        const nt = t.replace(/^[•·▪◦–—\-]\s*/, '').trim();
+        if (nt) cur.notes = (cur.notes ? cur.notes + '\n' : '') + nt;
+      }
+    }
+    if (cur) items.push(cur);
+    return items;
+  }
+
+  function pdfParseTraining(lines) {
+    const items = [];
+    let cur = null;
+    for (const line of lines) {
+      const t = line.text;
+      const hasYear = /\b(19|20)\d{2}\b/.test(t);
+      if (hasYear && !t.includes('·')) {
+        const dIs = line.items.filter(i => /\b(19|20)\d{2}\b/.test(i.text));
+        const nIs = line.items.filter(i => !dIs.includes(i));
+        if (cur) items.push(cur);
+        cur = { date: dIs.map(i=>i.text).join(' ').trim(), name: nIs.map(i=>i.text).join(' ').trim(), institute: '', duration: '' };
+      } else if (cur && t.includes('·')) {
+        const [a, ...rest] = t.split('·');
+        cur.institute = a.trim(); cur.duration = rest.join('·').trim();
+      } else if (cur && !cur.name) {
+        cur.name = t;
+      }
+    }
+    if (cur) items.push(cur);
+    return items;
+  }
+
+  function pdfParseStrengths(lines) {
+    return lines.map(line => {
+      const m = line.text.match(/^(.+?)\s*[—–]\s*(.+)$/);
+      return m ? { title: m[1].trim(), desc: m[2].trim() } : { title: line.text.trim(), desc: '' };
+    }).filter(s => s.title);
+  }
+
+  function pdfParseSide(lines, cv) {
+    const HEADS = {
+      'contact': 'contact', 'personal': 'personal',
+      'technical skill': 'skills', 'language': 'langs',
+      'interest': 'interests', 'hobbie': 'interests',
+      'reference': 'refs'
+    };
+    let section = null, buf = [];
+    const flush = () => {
+      if (!section || !buf.length) return;
+      if (section === 'contact')   cv.contactRows  = pdfParseKV(buf);
+      if (section === 'personal')  cv.personalRows = pdfParseKV(buf);
+      if (section === 'skills')    cv.skills       = buf.map(l => ({ name: l.text, lv: 70 })).filter(s => s.name);
+      if (section === 'langs')     cv.langs        = pdfParseLangs(buf);
+      if (section === 'interests') cv.interests    = buf.flatMap(l => l.items.map(i => i.text)).join(', ');
+      if (section === 'refs')      cv.refs         = pdfParseRefs(buf);
+    };
+    for (const line of lines) {
+      const tl = line.text.toLowerCase();
+      let hit = null;
+      for (const [h, k] of Object.entries(HEADS)) { if (tl.includes(h)) { hit = k; break; } }
+      if (hit) { flush(); section = hit; buf = []; }
+      else if (section) buf.push(line);
+    }
+    flush();
+  }
+
+  function pdfParseKV(lines) {
+    return lines.map(line => {
+      if (line.items.length >= 2)
+        return { k: line.items[0].text, v: line.items.slice(1).map(i => i.text).join(' ') };
+      const ci = line.text.indexOf(':');
+      return ci > 0
+        ? { k: line.text.slice(0, ci).trim(), v: line.text.slice(ci + 1).trim() }
+        : { k: '', v: line.text };
+    }).filter(r => r.v.trim());
+  }
+
+  function pdfParseLangs(lines) {
+    const LEVELS = ['native', 'fluent', 'advanced', 'intermediate', 'basic', 'beginner', 'elementary'];
+    return lines.map(line => {
+      if (line.items.length >= 2)
+        return { name: line.items[0].text, lvl: line.items.slice(1).map(i => i.text).join(' ') };
+      const tl = line.text.toLowerCase();
+      for (const lv of LEVELS) {
+        const idx = tl.lastIndexOf(lv);
+        if (idx > 0) return { name: line.text.slice(0, idx).trim(), lvl: line.text.slice(idx) };
+      }
+      return { name: line.text, lvl: '' };
+    }).filter(l => l.name);
+  }
+
+  function pdfParseRefs(lines) {
+    const refs = [];
+    let cur = null;
+    for (const line of lines) {
+      const t = line.text;
+      const isPhone = /^\+?[\d\s\-().]{7,}$/.test(t.replace(/\s/g, '')) || /^\+\d/.test(t);
+      if (!cur) {
+        cur = { name: t, role: '', phone: '' };
+      } else if (isPhone) {
+        cur.phone = t; refs.push(cur); cur = null;
+      } else {
+        cur.role = (cur.role ? cur.role + '\n' : '') + t;
+      }
+    }
+    if (cur && cur.name) refs.push(cur);
+    return refs;
+  }
+  // ────────────────────────────────────────────────────────────────────────────
+
 })();

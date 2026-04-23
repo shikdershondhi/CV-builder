@@ -1,0 +1,13 @@
+{
+  "name": "cv-sample-project",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "preview": "npx serve .",
+    "pdf": "node gen_pdf.mjs"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.42.0",
+    "serve": "^14.2.6"
+  }
+}

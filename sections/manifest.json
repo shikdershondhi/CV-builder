@@ -1,0 +1,14 @@
+{
+  "sections": [
+    { "slot": "sidebar", "file": "sections/cv/sidebar.html" },
+    { "slot": "header", "file": "sections/cv/header.html" },
+    { "slot": "objective", "file": "sections/cv/objective.html" },
+    { "slot": "work-experience", "file": "sections/cv/work-experience.html" },
+    { "slot": "education", "file": "sections/cv/education.html" },
+    { "slot": "training", "file": "sections/cv/training.html" },
+    { "slot": "strengths", "file": "sections/cv/strengths.html" },
+    { "slot": "footer", "file": "sections/cv/footer.html" },
+    { "slot": "tweaks", "file": "sections/ui/tweaks.html" },
+    { "slot": "editor", "file": "sections/ui/editor.html" }
+  ]
+}

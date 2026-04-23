@@ -1,20 +1,41 @@
 import puppeteer from 'puppeteer';
+import { readFile } from 'fs/promises';
 import { resolve } from 'path';
-import { pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 
-const htmlPath = resolve('/Users/shikdershondhi/Downloads/meem cv/Bakir Hossain CV.html');
-const pdfPath  = resolve('/Users/shikdershondhi/Downloads/meem cv/Bakir Hossain CV.pdf');
+const projectRoot = resolve(fileURLToPath(new URL('.', import.meta.url)));
+const indexPath = resolve(projectRoot, 'index.html');
+const manifestPath = resolve(projectRoot, 'sections/manifest.json');
+const pdfPath = resolve(projectRoot, 'CV Sample.pdf');
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function assembleHtml() {
+  const template = await readFile(indexPath, 'utf8');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+
+  let html = template;
+  for (const { slot, file } of manifest.sections) {
+    const fragment = await readFile(resolve(projectRoot, file), 'utf8');
+    const slotPattern = new RegExp(
+      `(<div class="slot" data-slot="${escapeRegExp(slot)}">)([\\s\\S]*?)(</div>)`
+    );
+    html = html.replace(slotPattern, `$1${fragment}$3`);
+  }
+
+  return html;
+}
 
 const browser = await puppeteer.launch({ headless: true });
-const page    = await browser.newPage();
+const page = await browser.newPage();
 
 await page.emulateMediaType('screen');
-// 1240px viewport: well above the 820px mobile breakpoint
 await page.setViewport({ width: 1240, height: 1800, deviceScaleFactor: 1 });
 
-await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'networkidle0', timeout: 30000 });
+await page.setContent(await assembleHtml(), { waitUntil: 'networkidle0' });
 
-// Base layout + fine-tuned spacing to fill A4 naturally
 await page.addStyleTag({ content: `
   body  { padding:0!important; margin:0!important; background:white!important; }
   .tweaks { display:none!important; }
@@ -26,25 +47,18 @@ await page.addStyleTag({ content: `
     grid-template-columns: 34% 1fr !important;
     align-items: stretch !important;
   }
-  /* Crop photo to square so it doesn't dominate the sidebar */
   .photo { aspect-ratio: 1 / 0.9 !important; }
-
-  /* Increase section spacing to fill A4 height naturally */
   .section          { margin-bottom: 26px !important; }
   .side-section     { margin-top: 28px !important; }
-  .item             { padding: 13px 0 !important; }
   .main             { padding: 44px 44px 52px !important; }
   .sidebar          { padding: 34px 26px 52px !important; }
 ` });
 
-// Measure content height; stretch to A4 only if content fits on one page
-const A4_H = 1754; // A4 height in px at scale 0.64
+const A4_H = 1754;
 const dims = await page.evaluate(() => ({
   contentH: document.querySelector('.page').offsetHeight,
 }));
 console.log('Content height after spacing:', dims);
-
-const targetH = A4_H;
 
 await page.evaluate((h) => {
   const p = document.querySelector('.page');
@@ -53,7 +67,7 @@ await page.evaluate((h) => {
   p.style.setProperty('align-content', 'stretch');
   document.querySelector('.sidebar').style.setProperty('align-self', 'stretch');
   document.querySelector('.main').style.setProperty('align-self', 'stretch');
-}, targetH);
+}, A4_H);
 
 const after = await page.evaluate(() => ({
   page: document.querySelector('.page').offsetHeight,

@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/CV%20Sample.html"
+      "destination": "/index.html"
     }
   ]
 }

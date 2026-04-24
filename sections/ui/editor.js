@@ -41,6 +41,12 @@
   const pdfBtn = $('#ed-pdf');
   if (pdfBtn) pdfBtn.onclick = () => setTimeout(() => window.print(), 0);
 
+  window.addEventListener('beforeunload', e => {
+    // Browser shows a generic confirmation dialog on reload/navigation.
+    e.preventDefault();
+    e.returnValue = 'Reloading will reset all unsaved changes.';
+  });
+
   // ── Save CV Data (JSON export) ──
   const saveJsonBtn = $('#ed-save-json');
   if (saveJsonBtn) saveJsonBtn.onclick = () => {
@@ -82,18 +88,6 @@
   let skillsData = [], langsData = [], eduData = [], strengthsData = [], workData = [], refsData = [], trainingData = [];
   let photoDataUrl = null;
   let photoFileName = 'photo.jpg';
-
-  // Restore photo from previous session
-  (function restorePhoto() {
-    try {
-      const saved = localStorage.getItem('cv-photo');
-      if (saved) {
-        photoDataUrl = saved;
-        photoFileName = localStorage.getItem('cv-photo-name') || 'photo.jpg';
-        applyPhoto(saved);
-      }
-    } catch(_) {}
-  })();
 
   // ── build editor ──
   function buildEditor() {
@@ -167,7 +161,6 @@
       const reader = new FileReader();
       reader.onload = ev => {
         photoDataUrl = ev.target.result;
-        try { localStorage.setItem('cv-photo', photoDataUrl); localStorage.setItem('cv-photo-name', photoFileName); } catch(_) {}
         applyPhoto(photoDataUrl);
         const preview = document.getElementById('photo-preview');
         if (preview) {
@@ -190,10 +183,6 @@
     removeBtn.onclick = () => {
       photoDataUrl = null;
       photoFileName = 'photo.jpg';
-      try {
-        localStorage.removeItem('cv-photo');
-        localStorage.removeItem('cv-photo-name');
-      } catch(_) {}
 
       const photoDiv = $('.photo');
       photoDiv.classList.remove('has-img');
@@ -925,12 +914,10 @@
     if (data.photo) {
       photoDataUrl  = data.photo;
       photoFileName = data.photoFileName || 'photo.jpg';
-      try { localStorage.setItem('cv-photo', photoDataUrl); localStorage.setItem('cv-photo-name', photoFileName); } catch(_) {}
       applyPhoto(photoDataUrl);
     } else {
       photoDataUrl  = null;
       photoFileName = 'photo.jpg';
-      try { localStorage.removeItem('cv-photo'); localStorage.removeItem('cv-photo-name'); } catch(_) {}
       const photoDiv = $('.photo');
       photoDiv.classList.remove('has-img');
       photoDiv.innerHTML = 'photo · 1:1';

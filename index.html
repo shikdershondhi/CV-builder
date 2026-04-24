@@ -595,8 +595,17 @@ html[data-photo="off"] .photo { display: none; }
   .edu-title, .job-title, .train-title { font-size: 13.5px !important; margin: 0 !important; }
   .edu-where, .job-where, .train-where { font-size: 12px !important; margin: 1px 0 2px !important; }
   .edu-note, .job-note { font-size: 12px !important; margin-top: 2px !important; line-height: 1.4 !important; }
-  .edu-note ul, .job-note ul { margin: 0 !important; padding-left: 14px !important; }
-  .edu-note li, .job-note li { padding: 0 !important; margin: 0 !important; }
+  .edu-note ul, .job-note ul { margin: 0 !important; padding: 0 !important; list-style: none !important; }
+  .edu-note li, .job-note li {
+    padding: 0 0 0 16px !important;
+    margin: 0 !important;
+    position: relative !important;
+  }
+  .edu-note li::before, .job-note li::before {
+    left: 0 !important;
+    top: 0.72em !important;
+    transform: translateY(-50%);
+  }
   .ref-card { padding: 4px 0 !important; }
   .soft       { padding: 1px 0 !important; font-size: 12.5px !important; }
   .soft-grid  { gap: 4px 14px !important; }
@@ -790,7 +799,6 @@ html[data-photo="off"] .photo { display: none; }
 })();
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="sections/ui/editor.js"></script>
 
 </body>

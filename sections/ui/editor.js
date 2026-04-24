@@ -246,8 +246,16 @@
   function jobNotesToText(noteEl) {
     if (!noteEl) return '';
     const ul = noteEl.querySelector('ul');
-    if (ul) return $$('li', ul).map(li => li.textContent.trim()).join('\n');
-    return noteEl.textContent.trim();
+    if (ul) return $$('li', ul).map(li => normalizeBulletLine(li.textContent)).filter(Boolean).join('\n');
+    return String(noteEl.textContent || '')
+      .split('\n')
+      .map(normalizeBulletLine)
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  function normalizeBulletLine(line) {
+    return String(line || '').replace(/^\s*[•▪◦\-–—*]+\s*/, '').trim();
   }
 
   function renderWork(c) {
@@ -275,7 +283,14 @@
       document.querySelectorAll('[data-wt]').forEach(el => { if (workData[+el.dataset.wt]) workData[+el.dataset.wt].title    = el.value; });
       document.querySelectorAll('[data-wo]').forEach(el => { if (workData[+el.dataset.wo]) workData[+el.dataset.wo].org      = el.value; });
       document.querySelectorAll('[data-wl]').forEach(el => { if (workData[+el.dataset.wl]) workData[+el.dataset.wl].location = el.value; });
-      document.querySelectorAll('[data-wb]').forEach(el => { if (workData[+el.dataset.wb]) workData[+el.dataset.wb].bullets  = el.value; });
+      document.querySelectorAll('[data-wb]').forEach(el => {
+        if (!workData[+el.dataset.wb]) return;
+        workData[+el.dataset.wb].bullets = el.value
+          .split('\n')
+          .map(normalizeBulletLine)
+          .filter(Boolean)
+          .join('\n');
+      });
     };
     renderWorkCards(c, wSync);
     makeSortable(c, wSync, workData, c2 => renderWorkCards(c2, wSync));
@@ -316,7 +331,15 @@
     document.querySelectorAll('[data-wt]').forEach(el => { workData[+el.dataset.wt].title    = el.value; });
     document.querySelectorAll('[data-wo]').forEach(el => { workData[+el.dataset.wo].org      = el.value; });
     document.querySelectorAll('[data-wl]').forEach(el => { workData[+el.dataset.wl].location = el.value; });
-    document.querySelectorAll('[data-wb]').forEach(el => { workData[+el.dataset.wb].bullets  = el.value; });
+    document.querySelectorAll('[data-wb]').forEach(el => {
+      const normalized = el.value
+        .split('\n')
+        .map(normalizeBulletLine)
+        .filter(Boolean)
+        .join('\n');
+      workData[+el.dataset.wb].bullets = normalized;
+      el.value = normalized;
+    });
 
     let workSec = null;
     $$('.section').forEach(sec => {
@@ -326,7 +349,7 @@
     $$('.job-item', workSec).forEach(el => el.remove());
 
     workData.forEach(w => {
-      const lines = (w.bullets||'').split('\n').map(l => l.trim()).filter(Boolean);
+      const lines = (w.bullets || '').split('\n').map(normalizeBulletLine).filter(Boolean);
       const bulletsHTML = lines.length
         ? '<div class="job-note"><ul>' + lines.map(l => `<li>${esc(l)}</li>`).join('') + '</ul></div>'
         : '';
@@ -524,8 +547,12 @@
   function notesToText(noteEl) {
     if (!noteEl) return '';
     const ul = noteEl.querySelector('ul');
-    if (ul) return $$('li', ul).map(li => li.textContent.trim()).join('\n');
-    return noteEl.textContent.trim();
+    if (ul) return $$('li', ul).map(li => normalizeBulletLine(li.textContent)).filter(Boolean).join('\n');
+    return String(noteEl.textContent || '')
+      .split('\n')
+      .map(normalizeBulletLine)
+      .filter(Boolean)
+      .join('\n');
   }
 
   function renderEdu(c) {
@@ -548,7 +575,14 @@
       document.querySelectorAll('[data-et]').forEach(el => { if (eduData[+el.dataset.et]) eduData[+el.dataset.et].title       = el.value; });
       document.querySelectorAll('[data-ei]').forEach(el => { if (eduData[+el.dataset.ei]) eduData[+el.dataset.ei].institution = el.value; });
       document.querySelectorAll('[data-eg]').forEach(el => { if (eduData[+el.dataset.eg]) eduData[+el.dataset.eg].grade       = el.value; });
-      document.querySelectorAll('[data-en]').forEach(el => { if (eduData[+el.dataset.en]) eduData[+el.dataset.en].notes       = el.value; });
+      document.querySelectorAll('[data-en]').forEach(el => {
+        if (!eduData[+el.dataset.en]) return;
+        eduData[+el.dataset.en].notes = el.value
+          .split('\n')
+          .map(normalizeBulletLine)
+          .filter(Boolean)
+          .join('\n');
+      });
     };
     renderEduCards(c, eSync);
     makeSortable(c, eSync, eduData, c2 => renderEduCards(c2, eSync));
@@ -587,7 +621,15 @@
     document.querySelectorAll('[data-et]').forEach(el => { eduData[+el.dataset.et].title       = el.value; });
     document.querySelectorAll('[data-ei]').forEach(el => { eduData[+el.dataset.ei].institution = el.value; });
     document.querySelectorAll('[data-eg]').forEach(el => { eduData[+el.dataset.eg].grade       = el.value; });
-    document.querySelectorAll('[data-en]').forEach(el => { eduData[+el.dataset.en].notes       = el.value; });
+    document.querySelectorAll('[data-en]').forEach(el => {
+      const normalized = el.value
+        .split('\n')
+        .map(normalizeBulletLine)
+        .filter(Boolean)
+        .join('\n');
+      eduData[+el.dataset.en].notes = normalized;
+      el.value = normalized;
+    });
 
     let eduSec = null;
     $$('.section').forEach(sec => {
@@ -597,7 +639,7 @@
     $$('.edu-item', eduSec).forEach(el => el.remove());
 
     eduData.forEach(e => {
-      const lines = (e.notes||'').split('\n').map(l=>l.trim()).filter(Boolean);
+      const lines = (e.notes || '').split('\n').map(normalizeBulletLine).filter(Boolean);
       const notesHTML = lines.length > 1
         ? '<ul>' + lines.map(l=>`<li>${esc(l)}</li>`).join('') + '</ul>'
         : (lines[0] ? esc(lines[0]) : '');
@@ -983,7 +1025,7 @@
       if (workSec) {
         $$('.job-item', workSec).forEach(el => el.remove());
         workData.forEach(w => {
-          const lines = (w.bullets || '').split('\n').map(l => l.trim()).filter(Boolean);
+          const lines = (w.bullets || '').split('\n').map(normalizeBulletLine).filter(Boolean);
           const bulletsHTML = lines.length ? '<div class="job-note"><ul>' + lines.map(l => `<li>${esc(l)}</li>`).join('') + '</ul></div>' : '';
           const div = document.createElement('div');
           div.className = 'job-item';
@@ -1003,7 +1045,7 @@
       if (eduSec) {
         $$('.edu-item', eduSec).forEach(el => el.remove());
         eduData.forEach(e => {
-          const lines = (e.notes || '').split('\n').map(l => l.trim()).filter(Boolean);
+          const lines = (e.notes || '').split('\n').map(normalizeBulletLine).filter(Boolean);
           const notesHTML = lines.length > 1 ? '<ul>' + lines.map(l => `<li>${esc(l)}</li>`).join('') + '</ul>' : (lines[0] ? esc(lines[0]) : '');
           const div = document.createElement('div');
           div.className = 'edu-item';

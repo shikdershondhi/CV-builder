@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "npx serve .",
     "preview": "npx serve .",
-    "pdf": "node gen_pdf.mjs"
+    "pdf": "node gen_pdf.mjs",
+    "preview-image": "node gen_preview.mjs"
   },
   "devDependencies": {
     "puppeteer": "^24.42.0",

@@ -14,7 +14,8 @@
     overlay.classList.add('open');
     fab.style.display = 'none';
     $('#style-fab').style.display  = 'none';
-    $('#upload-fab').style.display = 'none';
+    $('#ed-pdf').style.display     = 'none';
+    $('#github-fab').style.display = 'none';
   };
   $('#ed-close').onclick  = closePanel;
   overlay.onclick         = closePanel;
@@ -23,7 +24,8 @@
     overlay.classList.remove('open');
     fab.style.display = '';
     $('#style-fab').style.display  = '';
-    $('#upload-fab').style.display = '';
+    $('#ed-pdf').style.display     = '';
+    $('#github-fab').style.display = '';
   }
 
   const styleFab   = $('#style-fab');

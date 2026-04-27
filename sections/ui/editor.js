@@ -942,10 +942,11 @@
       footerLeft:   (footerSpans[0] || { textContent: '' }).textContent.trim(),
       footerRight:  (footerSpans[1] || { textContent: '' }).textContent.trim(),
       theme: {
-        style:       htmlEl.getAttribute('data-style')   || 'modern',
-        fontsize:    htmlEl.getAttribute('data-fontsize') || 'medium',
-        sidebar:     htmlEl.getAttribute('data-sidebar') || 'left',
-        photo:       htmlEl.getAttribute('data-photo')   || 'on',
+        style:       htmlEl.getAttribute('data-style')    || 'modern',
+        fontsize:    htmlEl.getAttribute('data-fontsize')  || 'medium',
+        sidebar:     htmlEl.getAttribute('data-sidebar')   || 'left',
+        photo:       htmlEl.getAttribute('data-photo')     || 'on',
+        template:    htmlEl.getAttribute('data-template')  || 'modern',
         accent:      (document.querySelector('.swatches[data-key="accent"] button.active')      || { dataset: { v: 'terracotta' } }).dataset.v,
         sidebarcolor:(document.querySelector('.swatches[data-key="sidebarcolor"] button.active') || { dataset: { v: 'charcoal'   } }).dataset.v
       }

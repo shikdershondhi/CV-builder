@@ -10,5 +10,8 @@
   "devDependencies": {
     "puppeteer": "^24.42.0",
     "serve": "^14.2.6"
+  },
+  "dependencies": {
+    "autoskills": "^0.3.4"
   }
 }

@@ -17,10 +17,15 @@ pnpm-debug.log*
 tmp/
 screenshots/
 uploads/
-.claude
+CLAUDE.local.md
+.claude/settings.local.json
 
 # Generated export files
 *.pdf
+
+# Claude Code agent skills (local tooling, not project code)
+.agents/
+skills-lock.json
 
 # Environment files
 .env

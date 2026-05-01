@@ -361,7 +361,7 @@
 /* Template picker cards */
 .tpl-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
 
@@ -437,4 +437,33 @@
 .tpl-pre--minimal .tpl-pre-side   { background: oklch(0.92 0.015 80); border-right: 1px solid oklch(0.87 0.005 80); }
 .tpl-pre--executive .tpl-pre-side { background: oklch(0.28 0.06 240); }
 .tpl-pre--creative .tpl-pre-side  { background: oklch(0.28 0.08 10); }
+
+/* Europass template card preview */
+.tpl-pre--europass {
+  flex-direction: column;
+  padding: 4px;
+  gap: 3px;
+}
+.tpl-pre-ep-header {
+  height: 12px;
+  background: #003399;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.tpl-pre-ep-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0;
+}
+.tpl-pre-ep-body span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: oklch(0.82 0.006 70);
+}
+.tpl-pre-ep-body span:first-child { width: 80%; background: oklch(0.55 0.006 70); }
+.tpl-pre-ep-body span:nth-child(2) { width: 60%; }
+.tpl-pre-ep-body span:nth-child(3) { width: 70%; }
 

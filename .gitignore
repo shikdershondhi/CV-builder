@@ -12,6 +12,7 @@ pnpm-debug.log*
 
 # Vercel local metadata
 .vercel/
+.vscode
 
 # Local temp and generated outputs
 tmp/

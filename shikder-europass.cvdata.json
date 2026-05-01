@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "photo": null,
+  "photoFileName": "photo.jpg",
+  "name": "M Ehatesham UL Islam",
+  "role": "Senior / Lead SQA Engineer",
+  "contactRows": [
+    { "k": "Email",    "v": "ahateshamulislam@gmail.com" },
+    { "k": "Phone",    "v": "(+880) 1676260539" },
+    { "k": "Address",  "v": "Dhaka, Bangladesh" },
+    { "k": "LinkedIn", "v": "linkedin.com/in/m-ehatesham-ul-islam" }
+  ],
+  "personalRows": [
+    { "k": "DOB",         "v": "14/05/1996" },
+    { "k": "Nationality", "v": "Bangladeshi" },
+    { "k": "Gender",      "v": "Male" },
+    { "k": "WhatsApp",    "v": "01676260539" }
+  ],
+  "skills": [
+    { "name": "Cypress (E2E)",         "lv": 90 },
+    { "name": "Playwright",            "lv": 85 },
+    { "name": "Selenium / TestNG",     "lv": 88 },
+    { "name": "API Testing",           "lv": 82 },
+    { "name": "JMeter / K6",           "lv": 78 },
+    { "name": "Jira / Confluence",     "lv": 92 },
+    { "name": "SQL",                   "lv": 70 },
+    { "name": "GitHub Copilot / AI",   "lv": 85 }
+  ],
+  "langs": [
+    {
+      "name": "Bengali",
+      "lvl": "Native",
+      "cefr": null
+    },
+    {
+      "name": "English",
+      "lvl": "C1",
+      "cefr": {
+        "listening":   "C1",
+        "reading":     "C1",
+        "spokenProd":  "B2",
+        "spokenInt":   "C1",
+        "writing":     "C1"
+      }
+    }
+  ],
+  "interests": "Software Testing, AI Tools, Automation, Tech Blogging",
+  "profile": "Creative thinker and content expert with in-depth knowledge of software Testing tools and languages. Looking for a position where I am utilizing my 7+ years of experience at a higher level with the power of AI",
+  "work": [
+    {
+      "date": "04/2025\n– Present",
+      "title": "Senior/Lead SQA Engineer",
+      "org": "Penta Global BD / yanna technology (USA)",
+      "location": "Dhaka, Bangladesh",
+      "bullets": "Testcase planning with Xray, test link, AI (GitHub Copilot)\nAutomation using Playwright, Selenium Robot Framework\nAI tools (Git Copilot, ChatGPT, Claude AI)\nManual and exploratory testing. Regression and integration testing."
+    },
+    {
+      "date": "02/2023\n– 03/2025",
+      "title": "Senior SQA Engineer L-1",
+      "org": "Vivasoft Ltd. — Klikit Cloud",
+      "location": "Dhaka, Bangladesh",
+      "bullets": "Ensuring high-quality web app and mobile app for Food Aggregator service\nAutomation using Cypress; manual and exploratory, regression and integration testing\nPerformance testing using JMeter & K6\nMobile Automation using Maestro by mobile.dev\nProjects: Webshop, Admin, Cloud, Reservation, etc.\nAI tools: Git Copilot, ChatGPT"
+    },
+    {
+      "date": "04/2013\n– 03/2024",
+      "title": "Quality Assurance Lead Consultant",
+      "org": "Teknovus Ltd.",
+      "location": "Dhaka, Bangladesh",
+      "bullets": "Build QA team for the client\nCoaching the team to learn manual & automation testing\nPlanning the sprint for the project"
+    },
+    {
+      "date": "08/2021\n– 02/2023",
+      "title": "Software Quality Assurance Engineer",
+      "org": "Welldev Bangladesh",
+      "location": "Zurich, Switzerland",
+      "bullets": "Welltravel System: UI & manual testing of Booking flow (flight, car, hotel), full admin & supplier features; full workflow automation (Cypress & Selenium TestNG); Jira maintenance\nTrueAct: Full ticket flow automation (Selenium TestNG)\nWellDay: Full software tested (UI & manual-functional)"
+    },
+    {
+      "date": "07/2019\n– 06/2021",
+      "title": "Software Quality Assurance Engineer",
+      "org": "Devnet Limited",
+      "location": "Dhaka, Bangladesh",
+      "bullets": "EDMS System: UI & manual testing of notification, critical workflows & Selenium TestNG automation\nBank Asia e-KYC: UI & manual testing — web and mobile\nHRMS for TIB: CV building to full exam process & recruitment with auto proctoring\nBkash mobile banking: UI & manual testing & Selenium TestNG automation\nIBBL Audit software: Reports, audit workflows, mailing\nTicket maintenance with Zoho-projects, Jira, Clubhouse"
+    },
+    {
+      "date": "08/2018\n– 12/2018",
+      "title": "Teaching Assistant (TA)",
+      "org": "American International University-Bangladesh",
+      "location": "Dhaka, Bangladesh",
+      "bullets": "Taking classes in LAB\nHelping assistant professor in office work"
+    }
+  ],
+  "edu": [
+    {
+      "date": "2015 – 2018",
+      "title": "B.Sc in Computer Science & Software Engineering",
+      "institution": "American International University – Bangladesh",
+      "grade": "Dhaka",
+      "notes": ""
+    }
+  ],
+  "training": [
+    {
+      "date": "2019",
+      "name": "Fundamental Software Testing and QA",
+      "institute": "BASIS Institute of Technology & Management",
+      "duration": "2 months"
+    }
+  ],
+  "strengths": [
+    { "title": "Test Leadership",   "desc": "Building QA teams and coaching junior testers in manual & automation" },
+    { "title": "AI-Augmented QA",  "desc": "Leveraging Claude AI, ChatGPT, GitHub Copilot to accelerate testing workflows" },
+    { "title": "Automation Depth", "desc": "End-to-end coverage across Playwright, Cypress, Selenium TestNG, Maestro" },
+    { "title": "Performance",      "desc": "Load and stress testing with JMeter & K6 on production-grade systems" }
+  ],
+  "refs": [],
+  "footerLeft": "M Ehatesham UL Islam",
+  "footerRight": "Senior / Lead SQA Engineer",
+  "europass": {
+    "dob":          "14/05/1996",
+    "nationality":  "Bangladeshi",
+    "gender":       "Male",
+    "phone":        "(+880) 1676260539",
+    "email":        "ahateshamulislam@gmail.com",
+    "website":      "https://shikdershondhi.lovestoblog.com/",
+    "linkedin":     "https://www.linkedin.com/in/m-ehatesham-ul-islam/",
+    "whatsapp":     "01676260539",
+    "address":      "Dhaka, Bangladesh",
+    "motherTongue": "Bengali"
+  },
+  "theme": {
+    "style":       "modern",
+    "fontsize":    "medium",
+    "sidebar":     "left",
+    "photo":       "on",
+    "template":    "europass",
+    "format":      "europass",
+    "accent":      "terracotta",
+    "sidebarcolor":"charcoal"
+  }
+}

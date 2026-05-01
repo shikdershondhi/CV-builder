@@ -91,6 +91,16 @@
   let photoDataUrl = null;
   let photoFileName = 'photo.jpg';
 
+  // ── Europass-specific state ──
+  let europassData = {
+    dob: '14/05/1996', nationality: 'Bangladeshi', gender: 'Male',
+    phone: '(+880) 1676260539', email: 'ahateshamulislam@gmail.com',
+    website: 'https://shikdershondhi.lovestoblog.com/',
+    linkedin: 'https://www.linkedin.com/in/m-ehatesham-ul-islam/',
+    whatsapp: '01676260539', address: 'Dhaka, Bangladesh',
+    motherTongue: 'Bengali'
+  };
+
   // ── build editor ──
   function buildEditor() {
     const body = $('#ed-body');
@@ -98,6 +108,7 @@
 
     addSection(body, 'Photo',                  renderPhoto);
     addSection(body, 'Header',                 renderHeader);
+    addSection(body, 'Europass Personal Info', renderEuropassInfo);
     addSection(body, 'Work Experience',        renderWork);
     addSection(body, 'References (Sidebar)',   renderRefs);
     addSection(body, 'Contact',                renderContact);
@@ -199,6 +210,7 @@
   }
 
   function applyPhoto(dataUrl) {
+    // Standard sidebar photo
     const photoDiv = $('.photo');
     photoDiv.innerHTML = '';
     photoDiv.classList.add('has-img');
@@ -206,6 +218,92 @@
     img.src = dataUrl;
     img.alt = 'Profile photo';
     photoDiv.appendChild(img);
+
+    // Europass header photo
+    const epWrap = $('.ep-photo-wrap');
+    if (epWrap) {
+      epWrap.innerHTML = '';
+      const epImg = document.createElement('img');
+      epImg.src = dataUrl;
+      epImg.alt = 'Profile photo';
+      epWrap.appendChild(epImg);
+    }
+  }
+
+  // ── Europass Personal Info ──
+  function renderEuropassInfo(c) {
+    c.innerHTML = `<p class="edf" style="font-size:11px;color:#888;margin:0 0 8px;">These fields populate the Europass header (name + personal info row).</p>`;
+    inp(c, 'Date of Birth',  'ep-dob',         europassData.dob,         '14/05/1996');
+    inp(c, 'Nationality',    'ep-nationality',  europassData.nationality,  'Bangladeshi');
+    inp(c, 'Gender',         'ep-gender',       europassData.gender,       'Male');
+    inp(c, 'Phone',          'ep-phone',        europassData.phone,        '(+880) 1234567890');
+    inp(c, 'Email',          'ep-email',        europassData.email,        'you@email.com');
+    inp(c, 'Website',        'ep-website',      europassData.website,      'https://yoursite.com');
+    inp(c, 'LinkedIn',       'ep-linkedin',     europassData.linkedin,     'https://linkedin.com/in/...');
+    inp(c, 'WhatsApp',       'ep-whatsapp',     europassData.whatsapp,     '01234567890');
+    inp(c, 'Address',        'ep-address',      europassData.address,      'City, Country');
+    inp(c, 'Mother Tongue',  'ep-mothertongue', europassData.motherTongue, 'Bengali');
+  }
+
+  function saveEuropassInfo() {
+    const g = id => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+    europassData.dob          = g('ep-dob');
+    europassData.nationality  = g('ep-nationality');
+    europassData.gender       = g('ep-gender');
+    europassData.phone        = g('ep-phone');
+    europassData.email        = g('ep-email');
+    europassData.website      = g('ep-website');
+    europassData.linkedin     = g('ep-linkedin');
+    europassData.whatsapp     = g('ep-whatsapp');
+    europassData.address      = g('ep-address');
+    europassData.motherTongue = g('ep-mothertongue');
+
+    // Apply to DOM
+    const setEp = (sel, val) => { const el = document.querySelector(sel); if (el) el.textContent = val; };
+    const setEpAttr = (attrSel, val) => {
+      const wrap = document.querySelector('.ep-personal-info');
+      if (!wrap) return;
+      wrap.querySelectorAll('.ep-info-item').forEach(item => {
+        const strong = item.querySelector('strong');
+        if (strong && strong.textContent.toLowerCase().includes(attrSel.toLowerCase())) {
+          // replace only the text node after the strong tag
+          [...item.childNodes].forEach(n => { if (n.nodeType === 3) n.textContent = ' ' + val; });
+        }
+      });
+    };
+
+    setEp('.ep-name', document.querySelector('#f-name') ? document.querySelector('#f-name').value.trim() || document.querySelector('.ep-name').textContent : document.querySelector('.ep-name').textContent);
+
+    // Rebuild personal info rows in europass header
+    const infoEl = document.querySelector('.ep-personal-info');
+    if (infoEl) {
+      infoEl.innerHTML = `
+        <div class="ep-info-row">
+          <span class="ep-info-item"><strong>Date of birth:</strong> ${esc(europassData.dob)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Nationality:</strong> ${esc(europassData.nationality)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Gender:</strong> ${esc(europassData.gender)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Phone:</strong> ${esc(europassData.phone)}</span>
+        </div>
+        <div class="ep-info-row">
+          <span class="ep-info-item"><strong>Email address:</strong> ${esc(europassData.email)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Website:</strong> ${esc(europassData.website)}</span>
+        </div>
+        <div class="ep-info-row">
+          <span class="ep-info-item"><strong>LinkedIn:</strong> ${esc(europassData.linkedin)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Whatsapp:</strong> ${esc(europassData.whatsapp)}</span>
+          <span class="ep-info-sep">|</span>
+          <span class="ep-info-item"><strong>Address:</strong> ${esc(europassData.address)}</span>
+        </div>`;
+    }
+
+    // Update mother tongue
+    const mtEl = document.querySelector('.ep-lang-mother');
+    if (mtEl) mtEl.innerHTML = `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`;
   }
 
   // ── Header ──
@@ -539,10 +637,16 @@
 
   // ── Profile ──
   function renderProfile(c) {
-    ta(c, 'Career Objective', 'f-prof', ($('.summary .lead')||{textContent:''}).textContent.trim());
+    // Read from whichever section is currently populated
+    const lead = $('.summary .lead');
+    const epAbout = $('.ep-about-text');
+    const val = (lead && lead.textContent.trim()) || (epAbout && epAbout.textContent.trim()) || '';
+    ta(c, 'Career Objective / About Myself', 'f-prof', val);
   }
   function saveProfile() {
-    const lead = $('.summary .lead'); if (lead) lead.textContent = $('#f-prof').value;
+    const val = $('#f-prof').value;
+    const lead = $('.summary .lead'); if (lead) lead.textContent = val;
+    const epAbout = $('.ep-about-text'); if (epAbout) epAbout.textContent = val;
   }
 
   // ── Education ──
@@ -864,9 +968,10 @@
       return { name: li.childNodes[0].textContent.trim(), lv };
     });
 
-    const langs = $$('.lang-list li').map(li => ({
+    const langs = $$('.lang-list li').map((li, i) => ({
       name: li.childNodes[0].textContent.trim(),
-      lvl:  li.querySelector('.lvl').textContent.trim()
+      lvl:  li.querySelector('.lvl').textContent.trim(),
+      cefr: (langsData[i] && langsData[i].cefr) ? langsData[i].cefr : null
     }));
 
     const work = $$('.job-item').map(item => {
@@ -941,12 +1046,14 @@
       work, edu, training, strengths, refs,
       footerLeft:   (footerSpans[0] || { textContent: '' }).textContent.trim(),
       footerRight:  (footerSpans[1] || { textContent: '' }).textContent.trim(),
+      europass:     Object.assign({}, europassData),
       theme: {
         style:       htmlEl.getAttribute('data-style')    || 'modern',
         fontsize:    htmlEl.getAttribute('data-fontsize')  || 'medium',
         sidebar:     htmlEl.getAttribute('data-sidebar')   || 'left',
         photo:       htmlEl.getAttribute('data-photo')     || 'on',
         template:    htmlEl.getAttribute('data-template')  || 'modern',
+        format:      htmlEl.getAttribute('data-format')    || 'standard',
         accent:      (document.querySelector('.swatches[data-key="accent"] button.active')      || { dataset: { v: 'terracotta' } }).dataset.v,
         sidebarcolor:(document.querySelector('.swatches[data-key="sidebarcolor"] button.active') || { dataset: { v: 'charcoal'   } }).dataset.v
       }
@@ -1017,8 +1124,11 @@
       chips.forEach(ch => { const s = document.createElement('span'); s.textContent = ch; el.appendChild(s); });
     }
 
-    // Career Objective
-    if (data.profile !== undefined) { const lead = $('.summary .lead'); if (lead) lead.textContent = data.profile; }
+    // Career Objective — sync to both standard and Europass sections
+    if (data.profile !== undefined) {
+      const lead = $('.summary .lead'); if (lead) lead.textContent = data.profile;
+      const epAbout = $('.ep-about-text'); if (epAbout) epAbout.textContent = data.profile;
+    }
 
     // Work Experience
     if (data.work) {
@@ -1113,6 +1223,61 @@
     if (data.footerLeft  !== undefined && footerSpans[0]) footerSpans[0].textContent = data.footerLeft;
     if (data.footerRight !== undefined && footerSpans[1]) footerSpans[1].textContent = data.footerRight;
 
+    // Europass personal info
+    if (data.europass) {
+      Object.assign(europassData, data.europass);
+      const infoEl = document.querySelector('.ep-personal-info');
+      if (infoEl) {
+        infoEl.innerHTML = `
+          <div class="ep-info-row">
+            <span class="ep-info-item"><strong>Date of birth:</strong> ${esc(europassData.dob)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Nationality:</strong> ${esc(europassData.nationality)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Gender:</strong> ${esc(europassData.gender)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Phone:</strong> ${esc(europassData.phone)}</span>
+          </div>
+          <div class="ep-info-row">
+            <span class="ep-info-item"><strong>Email address:</strong> ${esc(europassData.email)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Website:</strong> ${esc(europassData.website)}</span>
+          </div>
+          <div class="ep-info-row">
+            <span class="ep-info-item"><strong>LinkedIn:</strong> ${esc(europassData.linkedin)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Whatsapp:</strong> ${esc(europassData.whatsapp)}</span>
+            <span class="ep-info-sep">|</span>
+            <span class="ep-info-item"><strong>Address:</strong> ${esc(europassData.address)}</span>
+          </div>`;
+      }
+      const mtEl = document.querySelector('.ep-lang-mother');
+      if (mtEl) mtEl.innerHTML = `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`;
+    }
+
+    // Europass name sync
+    if (data.name) {
+      const epName = document.querySelector('.ep-name');
+      if (epName) epName.textContent = data.name;
+    }
+
+    // CEFR language levels
+    if (data.langs) {
+      data.langs.forEach((l, i) => {
+        if (!l.cefr) return;
+        const rows = document.querySelectorAll('.ep-lang-row');
+        if (!rows[i]) return;
+        const set = (cls, val) => { const el = rows[i].querySelector(cls); if (el) el.textContent = val; };
+        set('.ep-cefr-listening',   l.cefr.listening   || '');
+        set('.ep-cefr-reading',     l.cefr.reading     || '');
+        set('.ep-cefr-spoken-prod', l.cefr.spokenProd  || '');
+        set('.ep-cefr-spoken-int',  l.cefr.spokenInt   || '');
+        set('.ep-cefr-writing',     l.cefr.writing     || '');
+        const nameEl = rows[i].querySelector('.ep-lang-name');
+        if (nameEl) nameEl.textContent = l.name;
+      });
+    }
+
     // Theme
     if (data.theme && window.__cvApplyTheme) window.__cvApplyTheme(data.theme);
 
@@ -1132,7 +1297,7 @@
     saveHeader(); saveContact(); savePersonal(); saveSkills();
     saveLangs(); saveInterests(); saveProfile(); saveEdu();
     saveTraining(); saveStrengths(); saveFooter();
-    saveWork(); saveRefs();
+    saveWork(); saveRefs(); saveEuropassInfo();
     syncEmptyRows();
 
     const btn = $('#ed-save');

@@ -1,0 +1,252 @@
+/* ── Europass Format Styles ── */
+/* Activated when html[data-format="europass"] */
+
+/* ── Layout toggle ── */
+html[data-format="europass"] .sidebar { display: none !important; }
+html[data-format="europass"] .main    { display: none !important; }
+html[data-format="europass"] .page {
+  grid-template-columns: 1fr !important;
+  min-height: 0;
+  height: auto;
+}
+html[data-format="europass"] .ep-main { display: block; }
+
+/* Default: hide europass sections */
+.ep-main { display: none; }
+
+/* ── Europass page body ── */
+.ep-main {
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #1a1a1a;
+  padding: 20px 28px 32px;
+  line-height: 1.4;
+}
+
+/* ── Europass Header ── */
+.ep-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
+  gap: 0 16px;
+  align-items: start;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #aaa;
+}
+
+.ep-photo-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ep-photo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ep-photo-placeholder {
+  font-size: 9px;
+  color: #999;
+  text-align: center;
+  padding: 4px;
+}
+
+.ep-name-block { padding-top: 4px; }
+.ep-name {
+  font-size: 22pt;
+  font-weight: bold;
+  margin: 0 0 6px;
+  color: #1a1a1a;
+  line-height: 1.1;
+}
+
+.ep-personal-info {
+  font-size: 8.5pt;
+  line-height: 1.7;
+}
+.ep-personal-info .ep-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+}
+.ep-personal-info .ep-info-item {
+  white-space: nowrap;
+}
+.ep-personal-info .ep-info-item strong {
+  font-weight: bold;
+}
+.ep-personal-info .ep-info-sep {
+  color: #777;
+  margin: 0 2px;
+}
+
+.ep-logo-wrap {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+/* ── Europass Section Headers ── */
+.ep-section {
+  margin-bottom: 14px;
+}
+.ep-section:last-child { margin-bottom: 0; }
+
+.ep-sec-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.ep-sec-h::before {
+  content: '●';
+  color: #1a1a1a;
+  font-size: 7pt;
+  flex-shrink: 0;
+}
+.ep-sec-h-text {
+  font-size: 9pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1a1a1a;
+  border-bottom: 1px solid #aaa;
+  flex: 1;
+  padding-bottom: 3px;
+}
+
+/* ── About Myself ── */
+.ep-about-text {
+  font-size: 9.5pt;
+  line-height: 1.5;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0 0 0 16px;
+}
+
+/* ── Work / Education entries ── */
+.ep-entry {
+  padding: 4px 0 6px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.ep-entry:last-child { border-bottom: 0; }
+
+.ep-entry-meta {
+  font-size: 8.5pt;
+  color: #555;
+  margin-bottom: 1px;
+}
+.ep-entry-title {
+  font-size: 9.5pt;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 0 0 1px;
+}
+.ep-entry-org {
+  font-size: 9pt;
+  color: #333;
+  margin: 0 0 4px;
+}
+.ep-entry-bullets {
+  margin: 3px 0 0 0;
+  padding: 0 0 0 14px;
+  list-style: disc;
+  font-size: 9pt;
+  color: #333;
+  line-height: 1.5;
+}
+.ep-entry-bullets li { margin-bottom: 1px; }
+
+/* ── Skills ── */
+.ep-skills-category {
+  margin-bottom: 6px;
+  padding-left: 16px;
+}
+.ep-skills-cat-title {
+  font-size: 8.5pt;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 2px;
+}
+.ep-skills-list {
+  font-size: 9pt;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* ── Languages ── */
+.ep-lang-mother {
+  font-size: 9pt;
+  margin: 0 0 8px 16px;
+}
+.ep-lang-mother strong { font-weight: bold; }
+
+.ep-cefr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  margin-left: 16px;
+  max-width: calc(100% - 16px);
+}
+.ep-cefr-table th, .ep-cefr-table td {
+  border: 1px solid #aaa;
+  padding: 4px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+.ep-cefr-table thead tr:first-child th {
+  background: #f0f0f0;
+  font-weight: bold;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ep-cefr-table thead tr:first-child th[colspan] {
+  border-bottom: 2px solid #aaa;
+}
+.ep-cefr-table thead tr:nth-child(2) th {
+  background: #f8f8f8;
+  font-size: 7pt;
+  font-weight: normal;
+}
+.ep-cefr-table tbody td:first-child {
+  font-weight: bold;
+  text-align: left;
+  background: #fafafa;
+}
+.ep-cefr-table tbody td {
+  font-size: 8.5pt;
+}
+.ep-cefr-note {
+  font-size: 7pt;
+  color: #666;
+  font-style: italic;
+  margin: 4px 0 0 16px;
+}
+
+/* ── Print / PDF overrides for Europass ── */
+@media print {
+  html[data-format="europass"] .sidebar { display: none !important; }
+  html[data-format="europass"] .main    { display: none !important; }
+  html[data-format="europass"] .ep-main { display: block !important; }
+  html[data-format="europass"] .page {
+    grid-template-columns: 1fr !important;
+    width: 210mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  html[data-format="europass"] .ep-main {
+    padding: 16px 22px 24px !important;
+  }
+}

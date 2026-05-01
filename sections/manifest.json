@@ -8,6 +8,12 @@
     { "slot": "training", "file": "sections/cv/training.html" },
     { "slot": "strengths", "file": "sections/cv/strengths.html" },
     { "slot": "footer", "file": "sections/cv/footer.html" },
+    { "slot": "europass-header",    "file": "sections/cv/europass-header.html" },
+    { "slot": "europass-about",     "file": "sections/cv/europass-about.html" },
+    { "slot": "europass-work",      "file": "sections/cv/europass-work.html" },
+    { "slot": "europass-education", "file": "sections/cv/europass-education.html" },
+    { "slot": "europass-skills",    "file": "sections/cv/europass-skills.html" },
+    { "slot": "europass-languages", "file": "sections/cv/europass-languages.html" },
     { "slot": "tweaks", "file": "sections/ui/tweaks.html" },
     { "slot": "editor", "file": "sections/ui/editor.html" }
   ]

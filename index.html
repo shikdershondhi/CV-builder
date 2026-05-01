@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sections/ui/editor.css">
+<link rel="stylesheet" href="sections/cv/europass.css">
 <script defer src="/_vercel/insights/script.js"></script>
 <style>
 :root {
@@ -725,15 +726,17 @@ html[data-template="creative"] .side-h::before { border-radius: 50%; }
     photo: 'on',
     fontsize: 'medium',
     sidebarcolor: 'charcoal',
-    template: 'modern'
+    template: 'modern',
+    format: 'standard'
   };
 
   const TEMPLATES = {
-    modern:    { style:'modern',    accent:'terracotta', sidebarcolor:'charcoal', sidebar:'left',  fontsize:'medium', photo:'on'  },
-    classic:   { style:'classic',   accent:'navy',       sidebarcolor:'sand',     sidebar:'left',  fontsize:'medium', photo:'on'  },
-    minimal:   { style:'minimal',   accent:'ink',        sidebarcolor:'sand',     sidebar:'left',  fontsize:'medium', photo:'off' },
-    executive: { style:'bold',      accent:'navy',       sidebarcolor:'slate',    sidebar:'left',  fontsize:'medium', photo:'on'  },
-    creative:  { style:'editorial', accent:'plum',       sidebarcolor:'wine',     sidebar:'right', fontsize:'medium', photo:'on'  },
+    modern:    { style:'modern',    accent:'terracotta', sidebarcolor:'charcoal', sidebar:'left',  fontsize:'medium', photo:'on',  format:'standard' },
+    classic:   { style:'classic',   accent:'navy',       sidebarcolor:'sand',     sidebar:'left',  fontsize:'medium', photo:'on',  format:'standard' },
+    minimal:   { style:'minimal',   accent:'ink',        sidebarcolor:'sand',     sidebar:'left',  fontsize:'medium', photo:'off', format:'standard' },
+    executive: { style:'bold',      accent:'navy',       sidebarcolor:'slate',    sidebar:'left',  fontsize:'medium', photo:'on',  format:'standard' },
+    creative:  { style:'editorial', accent:'plum',       sidebarcolor:'wine',     sidebar:'right', fontsize:'medium', photo:'on',  format:'standard' },
+    europass:  { style:'modern',    accent:'terracotta', sidebarcolor:'charcoal', sidebar:'left',  fontsize:'medium', photo:'on',  format:'europass' },
   };
 </script>
 
@@ -748,6 +751,16 @@ html[data-template="creative"] .side-h::before { border-radius: 50%; }
     <div class="slot" data-slot="training"></div>
     <div class="slot" data-slot="strengths"></div>
     <div class="slot" data-slot="footer"></div>
+  </section>
+
+  <!-- Europass format — single column layout -->
+  <section class="ep-main">
+    <div class="slot" data-slot="europass-header"></div>
+    <div class="slot" data-slot="europass-about"></div>
+    <div class="slot" data-slot="europass-work"></div>
+    <div class="slot" data-slot="europass-education"></div>
+    <div class="slot" data-slot="europass-skills"></div>
+    <div class="slot" data-slot="europass-languages"></div>
   </section>
 </main>
 
@@ -814,6 +827,7 @@ html[data-template="creative"] .side-h::before { border-radius: 50%; }
     html.setAttribute('data-photo', state.photo);
     html.setAttribute('data-fontsize', state.fontsize);
     html.setAttribute('data-template', state.template || 'modern');
+    html.setAttribute('data-format', state.format || 'standard');
     html.style.setProperty('--accent', ACCENTS[state.accent] || ACCENTS.terracotta);
 
     const sc = SIDEBAR_COLORS[state.sidebarcolor] || SIDEBAR_COLORS.charcoal;
@@ -865,6 +879,7 @@ html[data-template="creative"] .side-h::before { border-radius: 50%; }
 
   window.__cvApplyTheme = function(themeData) {
     Object.assign(state, themeData);
+    if (!state.format) state.format = 'standard';
     apply();
   };
 

@@ -107,6 +107,7 @@ html[data-format="europass"] .ep-main { display: block; }
   gap: 8px;
   margin: 0 0 8px;
   font-family: Arial, Helvetica, sans-serif;
+  page-break-after: avoid;
 }
 .ep-sec-h::before {
   content: '●';
@@ -138,6 +139,7 @@ html[data-format="europass"] .ep-main { display: block; }
 .ep-entry {
   padding: 4px 0 6px 16px;
   border-bottom: 1px solid #e0e0e0;
+  page-break-inside: avoid;
 }
 .ep-entry:last-child { border-bottom: 0; }
 

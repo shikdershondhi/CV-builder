@@ -101,6 +101,36 @@
     motherTongue: 'Bengali'
   };
 
+  // ── Europass info HTML builder (skip empty fields) ──
+  function buildEpInfoHtml() {
+    const items = [
+      { label: 'Date of birth',     val: europassData.dob },
+      { label: 'Nationality',       val: europassData.nationality },
+      { label: 'Gender',            val: europassData.gender },
+      { label: 'Phone',             val: europassData.phone },
+    ];
+    const items2 = [
+      { label: 'Email address',     val: europassData.email },
+      { label: 'Website',           val: europassData.website },
+    ];
+    const items3 = [
+      { label: 'LinkedIn',          val: europassData.linkedin },
+      { label: 'Whatsapp',          val: europassData.whatsapp },
+      { label: 'Address',           val: europassData.address },
+    ];
+
+    const renderRow = (arr) => {
+      const vis = arr.filter(i => i.val && i.val.trim());
+      if (!vis.length) return '';
+      return '<div class="ep-info-row">' + vis.map((item, idx) => {
+        const sep = idx < vis.length - 1 ? ' <span class="ep-info-sep">|</span> ' : '';
+        return `<span class="ep-info-item"><strong>${item.label}:</strong> ${esc(item.val)}</span>${sep}`;
+      }).join('') + '</div>';
+    };
+
+    return renderRow(items) + renderRow(items2) + renderRow(items3);
+  }
+
   // ── build editor ──
   function buildEditor() {
     const body = $('#ed-body');
@@ -276,34 +306,13 @@
 
     // Rebuild personal info rows in europass header
     const infoEl = document.querySelector('.ep-personal-info');
-    if (infoEl) {
-      infoEl.innerHTML = `
-        <div class="ep-info-row">
-          <span class="ep-info-item"><strong>Date of birth:</strong> ${esc(europassData.dob)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Nationality:</strong> ${esc(europassData.nationality)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Gender:</strong> ${esc(europassData.gender)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Phone:</strong> ${esc(europassData.phone)}</span>
-        </div>
-        <div class="ep-info-row">
-          <span class="ep-info-item"><strong>Email address:</strong> ${esc(europassData.email)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Website:</strong> ${esc(europassData.website)}</span>
-        </div>
-        <div class="ep-info-row">
-          <span class="ep-info-item"><strong>LinkedIn:</strong> ${esc(europassData.linkedin)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Whatsapp:</strong> ${esc(europassData.whatsapp)}</span>
-          <span class="ep-info-sep">|</span>
-          <span class="ep-info-item"><strong>Address:</strong> ${esc(europassData.address)}</span>
-        </div>`;
-    }
+    if (infoEl) infoEl.innerHTML = buildEpInfoHtml();
 
     // Update mother tongue
     const mtEl = document.querySelector('.ep-lang-mother');
-    if (mtEl) mtEl.innerHTML = `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`;
+    if (mtEl) mtEl.innerHTML = europassData.motherTongue && europassData.motherTongue.trim()
+      ? `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`
+      : '';
   }
 
   // ── Header ──
@@ -1227,32 +1236,11 @@
     if (data.europass) {
       Object.assign(europassData, data.europass);
       const infoEl = document.querySelector('.ep-personal-info');
-      if (infoEl) {
-        infoEl.innerHTML = `
-          <div class="ep-info-row">
-            <span class="ep-info-item"><strong>Date of birth:</strong> ${esc(europassData.dob)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Nationality:</strong> ${esc(europassData.nationality)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Gender:</strong> ${esc(europassData.gender)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Phone:</strong> ${esc(europassData.phone)}</span>
-          </div>
-          <div class="ep-info-row">
-            <span class="ep-info-item"><strong>Email address:</strong> ${esc(europassData.email)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Website:</strong> ${esc(europassData.website)}</span>
-          </div>
-          <div class="ep-info-row">
-            <span class="ep-info-item"><strong>LinkedIn:</strong> ${esc(europassData.linkedin)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Whatsapp:</strong> ${esc(europassData.whatsapp)}</span>
-            <span class="ep-info-sep">|</span>
-            <span class="ep-info-item"><strong>Address:</strong> ${esc(europassData.address)}</span>
-          </div>`;
-      }
+      if (infoEl) infoEl.innerHTML = buildEpInfoHtml();
       const mtEl = document.querySelector('.ep-lang-mother');
-      if (mtEl) mtEl.innerHTML = `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`;
+      if (mtEl) mtEl.innerHTML = europassData.motherTongue && europassData.motherTongue.trim()
+        ? `<strong>Mother tongue(s):</strong> ${esc(europassData.motherTongue)}`
+        : '';
     }
 
     // Europass name sync
@@ -1284,11 +1272,41 @@
     syncEmptyRows();
   }
 
-  // ── Hide empty contact rows ──
+  // ── Hide empty contact rows & sections ──
   function syncEmptyRows() {
     $$('.contact-row').forEach(row => {
       row.classList.toggle('cv-empty', !row.querySelector('.v').textContent.trim());
     });
+
+    // Hide empty ep-info-row (all items within are hidden)
+    $$('.ep-info-row').forEach(row => {
+      const visibleItems = row.querySelectorAll('.ep-info-item');
+      const hasVisible = [...visibleItems].some(el => {
+        const text = el.textContent.replace(/^\s*[^:]+:\s*/, '').trim();
+        return text.length > 0;
+      });
+      row.classList.toggle('cv-empty', !hasVisible);
+    });
+
+    // Hide empty sidebar sections (no meaningful content)
+    $$('.side-section').forEach(sec => {
+      const text = sec.textContent.replace(/\s+/g, ' ').trim();
+      sec.classList.toggle('cv-empty', text.length === 0);
+    });
+
+    // Hide empty main sections (ep-section with no meaningful content)
+    $$('.ep-section').forEach(sec => {
+      const text = sec.textContent.replace(/\s+/g, ' ').trim();
+      const hasContent = text.length > 0 && text !== sec.querySelector('.ep-sec-h')?.textContent.trim();
+      sec.classList.toggle('cv-empty', !hasContent);
+    });
+
+    // Hide mother tongue if empty
+    const mtEl = document.querySelector('.ep-lang-mother');
+    if (mtEl) {
+      const mtText = mtEl.textContent.replace('Mother tongue(s):', '').trim();
+      mtEl.classList.toggle('cv-empty', mtText.length === 0);
+    }
   }
   syncEmptyRows(); // run on page load
 

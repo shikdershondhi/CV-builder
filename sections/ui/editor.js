@@ -86,6 +86,33 @@
     reader.readAsText(file);
   };
 
+  // ── Upload Europass CV (JSON import) ──
+  const uploadEpFab   = $('#upload-ep-fab');
+  const uploadEpInput = $('#ep-upload-input');
+  if (uploadEpFab) uploadEpFab.onclick = () => uploadEpInput.click();
+  if (uploadEpInput) uploadEpInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        data.theme = data.theme || {};
+        data.theme.format = 'europass';
+        data.theme.template = 'europass';
+        applyAllData(data);
+        if (panel.classList.contains('open')) buildEditor();
+        const prev = uploadEpFab.textContent;
+        uploadEpFab.textContent = 'Europass Loaded ✓';
+        setTimeout(() => { uploadEpFab.textContent = prev; }, 2000);
+      } catch(_) {
+        alert('Invalid file. Please upload a .json file exported from this CV builder.');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  };
+
   // ── mutable lists & photo state ──
   let skillsData = [], langsData = [], eduData = [], strengthsData = [], workData = [], refsData = [], trainingData = [];
   let photoDataUrl = null;

@@ -7,8 +7,10 @@ const projectRoot = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const indexPath = resolve(projectRoot, 'index.html');
 const manifestPath = resolve(projectRoot, 'sections/manifest.json');
 
-// Detect format from CLI arg: node gen_pdf.mjs [standard|europass]
-const formatArg = process.argv[2] || 'standard';
+// Detect format from CLI arg: node gen_pdf.mjs [standard|europass] [--no-photo]
+const args = process.argv.slice(2);
+const formatArg = args.find(a => a === 'standard' || a === 'europass') || 'standard';
+const hidePhoto = args.includes('--no-photo');
 const isEuropass = formatArg === 'europass';
 const pdfPath = resolve(projectRoot, isEuropass ? 'CV Sample Europass.pdf' : 'CV Sample.pdf');
 
@@ -67,6 +69,7 @@ if (isEuropass) {
       min-height: 0 !important;
     }
     .ep-main { padding: 28px 36px 40px !important; }
+    ${hidePhoto ? '.photo { display:none!important; } .ep-photo-wrap { visibility:hidden!important; width:72px!important; height:0!important; overflow:hidden!important; }' : ''}
   ` });
 
   const contentH = await page.evaluate(() => document.querySelector('.ep-main').scrollHeight);
@@ -99,6 +102,7 @@ if (isEuropass) {
     .side-section     { margin-top: 28px !important; }
     .main             { padding: 44px 44px 52px !important; }
     .sidebar          { padding: 34px 26px 52px !important; }
+    ${hidePhoto ? '.photo { display:none!important; } .ep-photo-wrap { visibility:hidden!important; width:72px!important; height:0!important; overflow:hidden!important; }' : ''}
   ` });
 
   const A4_H = 1754;

@@ -211,9 +211,16 @@
       <button type="button" id="photo-remove" class="photo-remove" aria-label="Remove photo">×</button>
       <img src="${imgSrc}" alt="Current photo">`;
 
+    const photoOn = document.documentElement.getAttribute('data-photo') !== 'off';
     c.innerHTML = `
       <div class="edf">
         <label class="edlabel">Profile Photo</label>
+        <div class="ed-photo-toggle">
+          <span class="ed-photo-toggle-label">Show in PDF</span>
+          <button type="button" class="ed-toggle ${photoOn ? 'on' : ''}" id="photo-toggle" aria-label="Toggle photo visibility">
+            <span class="ed-toggle-track"><span class="ed-toggle-thumb"></span></span>
+          </button>
+        </div>
         <label class="photo-upload-label" for="f-photo">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           Choose image file…
@@ -242,6 +249,14 @@
       reader.readAsDataURL(file);
     };
 
+    const toggleBtn = document.getElementById('photo-toggle');
+    if (toggleBtn) {
+      toggleBtn.onclick = () => {
+        const isOn = toggleBtn.classList.toggle('on');
+        document.documentElement.setAttribute('data-photo', isOn ? 'on' : 'off');
+      };
+    }
+
     const preview = document.getElementById('photo-preview');
     wireRemovePhotoButton(preview);
   }
@@ -257,6 +272,11 @@
       const photoDiv = $('.photo');
       photoDiv.classList.remove('has-img');
       photoDiv.innerHTML = 'photo · 1:1';
+
+      const epWrap = $('.ep-photo-wrap');
+      if (epWrap) {
+        epWrap.innerHTML = '<div class="ep-photo-placeholder">photo</div>';
+      }
 
       previewEl.innerHTML = '';
       previewEl.classList.remove('visible');
